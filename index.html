@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Project Closure Quest｜專案終止 × 組織記憶（6輪）</title>
+  <title>Project Closure Quest｜專案終止 × 組織記憶（尾牙案例版）</title>
   <style>
     :root { --bg:#0f172a; --card:#111827; --ink:#e5e7eb; --ink2:#cbd5e1; --accent:#22d3ee; --muted:#475569; --ok:#22c55e; --warn:#f59e0b; --bad:#ef4444; }
     html,body{margin:0;height:100%;font-family: system-ui, -apple-system, "Segoe UI", Roboto, Noto Sans TC, Arial, sans-serif;background:var(--bg);color:var(--ink);} 
@@ -58,13 +58,6 @@
       textarea{min-height:160px}
       .bar{gap:.5rem}
     }
-      nav{position:static}
-      .grid2{grid-template-columns:1fr}
-      .cols{grid-template-columns:1fr}
-      .check{flex-direction:column;align-items:flex-start}
-      textarea{min-height:160px}
-      .bar{gap:.5rem}
-    }
   </style>
 </head>
 <body>
@@ -89,15 +82,28 @@
         <ul>
           <li>依左側選單依序闖關；每關完成會加分。</li>
           <li>可隨時點「匯出成果」下載 Markdown 報告。</li>
-          <li>本檔可直接放 Github Pages，檔名 <span class="kbd">index.html</span>。</li>
+          <li>本檔可直接放 GitHub Pages，檔名 <span class="kbd">index.html</span>。</li>
         </ul>
+      </div>
+      <div class="card small">
+        <div class="hint">案例切換</div>
+        <div class="row">
+          <select id="caseSelect">
+            <option value="year_end">尾牙活動（預設）</option>
+            <option value="normal">一般產品專案（正常結案）</option>
+            <option value="early">策略轉向（提前終止）</option>
+            <option value="cancel">合規風險（取消/中止）</option>
+            <option value="bau">轉移至維運（BAU）</option>
+          </select>
+          <button class="btn" id="applyCase">套用案例</button>
+        </div>
       </div>
     </nav>
     <div>
       <!-- Lv1 情境與決策樹 -->
       <section id="lv1" class="card active">
         <h2>Lv1｜終止情境 × 決策樹</h2>
-        <p class="hint">抽一張情境卡，回答二分問題，產出 6 句話終止溝通稿。</p>
+        <p class="hint">抽一張情境卡（或在左側選案例），回答二分問題，產出 6 句話終止溝通稿。</p>
         <div class="row">
           <button class="btn" id="drawScenario">抽情境卡</button>
           <span id="scenarioTag" class="tag"></span>
@@ -129,15 +135,15 @@
                 <option value="移轉至維運（BAU）">移轉至維運（BAU）</option>
               </select>
               <label>關鍵數據（成效/成本/風險）</label>
-              <input id="q_data" placeholder="例：達成 KPI 92%，持續成本↑30%" />
+              <input id="q_data" placeholder="例：出席 482、滿意度 4.5/5、成本差異 +3%" />
             </div>
             <div>
               <label>風險控管與補救</label>
-              <input id="q_mit" placeholder="例：資料備份完成，供應商保固至 2026-06-30" />
+              <input id="q_mit" placeholder="例：名單遮罩公開；未領獎品郵寄；媒體授權補簽" />
               <label>後續里程碑（日期）</label>
-              <input id="q_next" placeholder="例：12/20 完成移交；12/27 提交結案報告" />
+              <input id="q_next" placeholder="例：週五完成對帳；下週三上架相簿/影片；下週五提報" />
               <label>聯絡窗口</label>
-              <input id="q_contact" placeholder="例：PM 王小明（pm@example.com）" />
+              <input id="q_contact" placeholder="例：行政處專案管理室（PM 王小明）pm@example.com" />
             </div>
           </div>
           <div class="row" style="margin-top:.5rem">
@@ -146,6 +152,28 @@
         </div>
         <div class="row">
           <button class="btn primary" data-finish="lv1">完成此關</button>
+        </div>
+      </section>
+
+      <!-- Lv2 DOR-Close 拖放 -->
+      <section id="lv2" class="card">
+        <h2>Lv2｜DOR-Close（準備就緒）拖放檢核</h2>
+        <p class="hint">把要件拖進「必備/選配/不需要」。並自訂 3 條。</p>
+        <div class="cols">
+          <div>
+            <div class="hint">候選要件</div>
+            <div id="dorPool"></div>
+            <div class="row">
+              <input id="customDor" placeholder="新增自訂要件…" />
+              <button class="btn" id="addDor">新增</button>
+            </div>
+          </div>
+          <div class="col" data-bucket="必備"><div class="hint">必備</div></div>
+          <div class="col" data-bucket="選配"><div class="hint">選配</div></div>
+          <div class="col" data-bucket="不需要"><div class="hint">不需要</div></div>
+        </div>
+        <div class="row" style="margin-top:.6rem">
+          <button class="btn primary" data-finish="lv2">完成此關</button>
         </div>
       </section>
 
@@ -174,7 +202,7 @@
         <div class="grid2">
           <div>
             <label>接手單位/Owner</label>
-            <input id="owner" placeholder="e.g., 維運組／王小明" />
+            <input id="owner" placeholder="e.g., 行政處維運組／王小明" />
             <label>Review Date（下次複審日）</label>
             <input id="review" type="date" />
             <label>存放路徑/連結</label>
@@ -197,13 +225,13 @@
         <div class="grid2">
           <div>
             <label>教訓學習（逐字稿/摘錄）</label>
-            <textarea id="lessonsSrc">1) 上線前未凍結名單導致返工。
-2) 抽獎腳本無備援，直播延遲。
-3) 供應商驗收未留影像，請款爭議。</textarea>
+            <textarea id="lessonsSrc">1) 抽獎名單未在 T-24h 凍結，臨場手改兩次。
+2) 直播錄影分散三台相機，回收延後。
+3) 合約版本不一致，對帳來回兩次。</textarea>
           </div>
           <div>
             <label>SOP/Checklist（請用「名詞＋動作＋證據」句型）</label>
-            <textarea id="lessonsOut" placeholder="例：抽獎名單已完成版本凍結（檔名與時間戳），上傳連結附於決策紀錄。"></textarea>
+            <textarea id="lessonsOut" placeholder="例：抽獎名單 T-24h 凍結（檔名+時間戳），Decision Log 附連結；媒資歸檔表完成（來源/格式/路徑/權限）。"></textarea>
           </div>
         </div>
         <div class="row">
@@ -230,11 +258,11 @@
     </div>
   </main>
   <footer>
-    <div class="small">© 2025 Project Closure Quest — 單檔教學版。此檔不依賴外部套件，支援 GitHub Pages。作者：你和你的助教 😄</div>
+    <div class="small">© 2025 Project Closure Quest — 單檔教學版（尾牙案例）。此檔不依賴外部套件，支援 GitHub Pages。</div>
   </footer>
 </div>
 <script>
-// --- 簡易資料 ---
+// --- 全域狀態 ---
 const state = {
   score: 0,
   finished: {},
@@ -246,7 +274,18 @@ const state = {
   lv6: { files: [] }
 };
 
+// --- 案例/情境卡 ---
 const scenarios = [
+  { id:"year_end", title:"尾牙活動｜正常結案",
+    deliverable:"場地/餐飲、主持/節目、抽獎系統、直播攝影、結案報告",
+    objective:"活動完成，進行驗收與移交",
+    done_example:"出席482(目標≥450)、滿意度4.5/5、成本差異 +3%",
+    facts:["個資名單需處置","5家供應商對帳待完成","媒體資產分散"],
+    questions:[
+      {k:"mvp", q:"是否達成活動KPI與MVP？"},
+      {k:"risk", q:"合規/個資/媒資風險是否在可接受範圍？"},
+      {k:"stake", q:"主要干係人是否理解並同意結案？"}
+    ]},
   { id:"normal", title:"功能達成，收尾結案",
     deliverable:"V1 功能集（報名頁 + 抽獎模組）",
     objective:"已滿足 MVP，準備驗收與移交",
@@ -289,52 +328,55 @@ const scenarios = [
     ]},
 ];
 
-
-const dorPool = [
+// --- DOR 候選（含尾牙專屬） ---
+const dorPoolData = [
+  "5家供應商對帳資料就緒（估算/實支/發票/尾款）",
+  "個資處置方案（保存或銷毀）與記錄模板就緒",
+  "媒體資產盤點草案（來源/格式/路徑/權限）",
+  "抽獎名單最終版與凍結時間點簽認",
+  "結案公告草稿（內部）",
   "合約/採購未結義務盤點完成",
   "財務預估 vs 實際收支盤點完成",
   "移交對象與 SLA 草案就緒",
   "資安/法遵/品牌核對清單備妥",
-  "干係人對終止理由與範圍初步同意",
   "結案文件骨架建立（Closure/Handover/Lessons）",
   "環境與帳號清冊初稿",
   "風險殘留清單初稿（Owner/期限）"
 ];
 
+// --- DOD 候選（含尾牙專屬 good:true/false） ---
 const dodPool = [
+  {t:"供應商對帳完成並附發票/收據/尾款文件連結", good:true},
+  {t:"個資處置完成（保存/銷毀紀錄與連結）", good:true},
+  {t:"媒體資產上架且權限設定完成（路徑）", good:true},
+  {t:"抽獎紀錄與公開名單（遮罩）已存檔", good:true},
   {t:"正式驗收與簽認完成（附連結）", good:true},
-  {t:"供應商對帳/請款/保固文件齊全", good:true},
   {t:"移交完成：Owner/ReviewDate/存放路徑寫明", good:true},
   {t:"教訓學習會議完成並入庫", good:true},
   {t:"最終KPI與差異分析定稿", good:true},
   {t:"風險殘留已指定Owner與追蹤日程", good:true},
   {t:"結案公告發布（對內/對外）", good:true},
   {t:"大家都覺得很圓滿", good:false},
-  {t:"好像差不多可以結束了", good:false},
-  {t:"照片與影片整理歸檔（權限設定完成）", good:true},
-  {t:"擬定未來也要更努力", good:false},
-  {t:"資料保存/銷毀策略執行證明", good:true},
-  {t:"決策清單與依據入庫（Decision Log）", good:true},
-  {t:"隨緣即可", good:false}
+  {t:"好像差不多可以結束了", good:false}
 ];
 
 const assets = [
-  "源碼/原始檔/設計檔",
-  "可執行包/部署腳本/回滾方案",
-  "帳號/權限清冊",
-  "Runbook/SOP",
-  "SLA/維護窗口/值班表",
+  "相簿原始檔（RAW/JPG）＋精選集",
+  "影片素材與剪輯工程檔",
+  "社群貼文素材（圖像、文案）",
+  "抽獎程式/腳本與 README",
   "合約/保固/授權文件",
-  "使用者文件/FAQ",
-  "稽核Log/監控儀表板連結"
+  "決策紀錄（變更/例外/風險）",
+  "報到/座位/流程看板（最終版）",
+  "媒體授權/肖像聲明"
 ];
 
 const messyFiles = [
-  "final_final_report_v3(真的最後).pptx",
-  "IMG_20241211_134233.JPG",
+  "final_final_video.MOV",
+  "IMG_9981.JPG",
   "doc1.docx",
-  "報告new最新最終版.pptx",
-  "meeting_notes(小美).txt"
+  "尾牙直播_小張_2025.mov",
+  "meeting_notes.txt"
 ];
 
 // --- 導航 ---
@@ -369,8 +411,8 @@ const scenarioBox = document.getElementById('scenarioBox');
 const decisionBox = document.getElementById('decisionBox');
 const scenarioTag = document.getElementById('scenarioTag');
 
-drawBtn.onclick = ()=>{
-  const s = scenarios[Math.floor(Math.random()*scenarios.length)];
+function drawScenarioById(id){
+  const s = scenarios.find(x=>x.id===id) || scenarios[0];
   state.lv1.scenario = s; state.lv1.answers={};
   scenarioTag.textContent = s.title;
   scenarioBox.innerHTML = `
@@ -395,52 +437,22 @@ drawBtn.onclick = ()=>{
 4) 受影響對象的補救/資源安排。
 5) 後續里程碑（範例：下週三完成移交）。
 6) 聯絡窗口（單位/姓名/信箱）。`;
-};  state.lv1.scenario = s; state.lv1.answers={};
-  scenarioTag.textContent = s.title;
-  // 情境摘要（清楚說明：要結束的是什麼？完成到哪？）
-  scenarioBox.innerHTML = `
-    <div class="small">
-      <div><strong>要結束/移交的交付物：</strong>${s.deliverable}</div>
-      <div><strong>目前狀態：</strong>${s.objective}；<em>完成例：</em>${s.done_example}</div>
-      <div><strong>事實：</strong>${s.facts.map(f=>`<span class=\"tag\">${f}</span>`).join(' ')}</div>
-    </div>`;
-  decisionBox.innerHTML = '';
-  s.questions.forEach(q=>{
-    const row=document.createElement('div'); row.className='check';
-    row.innerHTML = `<div class="small">${q.q}</div>
-      <div class="right flex">
-        <label class="flex"><input type="radio" name="${q.k}" value="yes"> <span class="small">是</span></label>
-        <label class="flex"><input type="radio" name="${q.k}" value="no"> <span class="small">否</span></label>
-      </div>`;
-    decisionBox.appendChild(row);
-  });
-  // 提示 6 句話要怎麼寫
-  document.getElementById('closureScript').placeholder = `1) 決策事實（我們將${s.title}）。
-2) 終止/結案理由（${s.facts[0]}…以數據說明）。
-3) 風險控管（目前風險與對策）。
-4) 受影響對象的補救/資源安排。
-5) 後續里程碑（例如：${new Date().toISOString().slice(0,10)} 完成移交）。
-6) 聯絡窗口（單位/姓名/信箱）。`;
+}
+
+drawBtn.onclick = ()=>{
+  const s = scenarios[Math.floor(Math.random()*scenarios.length)];
+  drawScenarioById(s.id);
 };
 
-  scenarioTag.textContent = s.title;
-  scenarioBox.innerHTML = `<div class="small">事實：${s.facts.map(f=>`<span class="tag">${f}</span>`).join(' ')}</div>`;
-  decisionBox.innerHTML = '';
-  s.questions.forEach(q=>{
-    const row=document.createElement('div'); row.className='check';
-    row.innerHTML = `<div class="small">${q.q}</div>
-      <div class="right flex">
-        <label class="flex"><input type="radio" name="${q.k}" value="yes"> <span class="small">是</span></label>
-        <label class="flex"><input type="radio" name="${q.k}" value="no"> <span class="small">否</span></label>
-      </div>`;
-    decisionBox.appendChild(row);
-  });
-};
+// 左側案例套用
+const caseSelect = document.getElementById('caseSelect');
+const applyCaseBtn = document.getElementById('applyCase');
+if(applyCaseBtn){ applyCaseBtn.addEventListener('click', ()=> drawScenarioById(caseSelect.value)); }
 
 // --- Lv2 DOR Drag ---
 const dorPoolBox = document.getElementById('dorPool');
 function makeItem(text){ const d=document.createElement('div'); d.className='item'; d.draggable=true; d.textContent=text; d.addEventListener('dragstart',ev=>{ev.dataTransfer.setData('text/plain', text);}); return d; }
-function renderDorPool(){ dorPoolBox.innerHTML=''; dorPool.forEach(t=> dorPoolBox.appendChild(makeItem(t))); }
+function renderDorPool(){ dorPoolBox.innerHTML=''; dorPoolData.forEach(t=> dorPoolBox.appendChild(makeItem(t))); }
 renderDorPool();
 
 document.querySelectorAll('.col').forEach(col=>{
@@ -454,7 +466,7 @@ document.querySelectorAll('.col').forEach(col=>{
 
 document.getElementById('addDor').onclick = ()=>{
   const v = document.getElementById('customDor').value.trim();
-  if(!v) return; dorPool.push(v); renderDorPool(); document.getElementById('customDor').value='';
+  if(!v) return; dorPoolData.push(v); renderDorPool(); document.getElementById('customDor').value='';
 };
 
 // --- Lv3 DOD checklist ---
@@ -464,7 +476,7 @@ function renderDod(){
   dodList.innerHTML='';
   dodPool.forEach((d,i)=>{
     const wrap=document.createElement('div'); wrap.className='check';
-    wrap.innerHTML = `<input type="checkbox" data-i="${i}"> <div>${d.t} ${d.good?'<span class="ok">(可檢核)</span>':'<span class="bad">(口號/不可檢核)</span>'}</div>`;
+    wrap.innerHTML = `<input type="checkbox" data-i="${i}"> <div>${d.t} ${d.good?'<span class="ok">(可檢核)</span>':'<span class="bad">(不可檢核)</span>'}</div>`;
     dodList.appendChild(wrap);
   });
   dodNotes.innerHTML='';
@@ -492,12 +504,14 @@ assetList.addEventListener('change', (e)=>{
     const a=e.target.dataset.asset; if(e.target.checked){ if(!state.lv4.assets.includes(a)) state.lv4.assets.push(a);} else { state.lv4.assets = state.lv4.assets.filter(x=>x!==a);} }
 });
 
-// --- Lv5 rewrite helper (簡易規則，把句子轉句型) ---
+// --- Lv5 rewrite helper (簡易規則) ---
 function rewriteLines(txt){
-  return txt.split(/\n+/).map(s=>s.trim()).filter(Boolean).map((s,i)=>{
+  return txt.split(/
++/).map(s=>s.trim()).filter(Boolean).map((s,i)=>{
     let noun=s.replace(/[。.!?]$/,'');
-    return `${i+1}. ${noun} 已建立對應控制（證據：連結/截圖/檔名）`;
-  }).join('\n');
+    return `${i+1}. ${noun} → 已建立控制與證據（連結/截圖/檔名）`;
+  }).join('
+');
 }
 
 document.getElementById('autoRewrite').onclick=()=>{
@@ -513,9 +527,9 @@ function renderFiles(){
     row.innerHTML = `<div class="check"><div>原檔名：<span class="tag">${f}</span></div></div>
       <div class="check">
         <div class="small">新檔名（格式：主題-制品-版本-日期-Owner）</div>
-        <input data-file="${i}" placeholder="例如：尾牙-結案報告-v1.0-2025-12-01-JF">
+        <input data-file="${i}" placeholder="例如：尾牙-結案報告-v1.0-2025-12-30-Admin">
         <div class="small">標籤（≤5，用逗號分隔）</div>
-        <input data-tags="${i}" placeholder="#活動管理,#教訓學習,#模板">
+        <input data-tags="${i}" placeholder="#尾牙,#媒體,#個資,#供應商,#結案">
       </div>`;
     fileList.appendChild(row);
   });
@@ -529,10 +543,13 @@ function finish(id){
   if(id==='lv1'){
     document.querySelectorAll('#decisionBox input[type=radio]:checked').forEach(r=>{ state.lv1.answers[r.name]=r.value; });
     state.lv1.script = document.getElementById('closureScript').value.trim();
-    if(!state.lv1.script) return alert('請寫 6 句話溝通稿');
+    if(!state.lv1.script) return alert('請寫 6 句話溝通稿（可用上方快速產生器）');
   }
   if(id==='lv2'){
-    const need = state.lv2.buckets['必備'] || []; if(need.length<4) return alert('至少放 4 條在「必備」');
+    const need = state.lv2.buckets['必備'] || []; if(need.length<5) return alert('至少放 5 條在「必備」');
+    // 必備應包含三大要件之一
+    const must = ["5家供應商對帳資料就緒（估算/實支/發票/尾款）","個資處置方案（保存或銷毀）與記錄模板就緒","媒體資產盤點草案（來源/格式/路徑/權限)"];
+    if(!must.some(x=>need.includes(x))) alert('建議把「對帳/個資/媒資」至少選一項放入必備');
   }
   if(id==='lv3'){
     const c = state.lv3.chosen.length; if(c<10 || c>12) return alert('請勾選 10–12 條 DOD');
@@ -569,7 +586,41 @@ function renderPreview(){
 }
 
 function genMarkdown(){
-  return `# Project Closure Quest 成果\n\n總分：${state.score}\n已完成關卡：${Object.keys(state.finished).join(', ')}\n\n## Lv1 決策樹\n情境：${state.lv1.scenario?state.lv1.scenario.title:''}\n答案：${JSON.stringify(state.lv1.answers)}\n\n### 6句話終止溝通稿\n${state.lv1.script}\n\n## Lv2 DOR-Close 分類\n${Object.entries(state.lv2.buckets).map(([k,v])=>`- ${k}: ${v.join('、')}`).join('\n')}\n\n## Lv3 DOD-Close 選項\n- 勾選：${state.lv3.chosen.join('、')}\n- 補述：\n${(state.lv3.notes||[]).map(n=>`  - ${n.k}: ${n.v}`).join('\n')}\n\n## Lv4 移交\n- Owner：${state.lv4.owner}\n- Review Date：${state.lv4.review}\n- Repo/Path：${state.lv4.repo}\n- 資產：${state.lv4.assets.join('、')}\n\n## Lv5 SOP/Checklist\n${state.lv5.out}\n\n## Lv6 命名/標籤\n${(state.lv6.files||[]).map(f=>`- ${f.name} | tags: ${f.tags}`).join('\n')}\n`;
+  return `# Project Closure Quest 成果
+
+總分：${state.score}
+已完成關卡：${Object.keys(state.finished).join(', ')}
+
+## Lv1 決策樹
+情境：${state.lv1.scenario?state.lv1.scenario.title:''}
+答案：${JSON.stringify(state.lv1.answers)}
+
+### 6句話終止溝通稿
+${state.lv1.script}
+
+## Lv2 DOR-Close 分類
+${Object.entries(state.lv2.buckets).map(([k,v])=>`- ${k}: ${v.join('、')}`).join('
+')}
+
+## Lv3 DOD-Close 選項
+- 勾選：${state.lv3.chosen.join('、')}
+- 補述：
+${(state.lv3.notes||[]).map(n=>`  - ${n.k}: ${n.v}`).join('
+')}
+
+## Lv4 移交
+- Owner：${state.lv4.owner}
+- Review Date：${state.lv4.review}
+- Repo/Path：${state.lv4.repo}
+- 資產：${state.lv4.assets.join('、')}
+
+## Lv5 SOP/Checklist
+${state.lv5.out}
+
+## Lv6 命名/標籤
+${(state.lv6.files||[]).map(f=>`- ${f.name} | tags: ${f.tags}`).join('
+')}
+`;
 }
 
 function escapeHtml(s){ return s.replace(/[&<>]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); }
@@ -582,12 +633,11 @@ document.getElementById('exportMd').onclick=()=>{ download('closure-quest-output
 
 document.getElementById('reset').onclick=()=>{ if(confirm('確認重置？')) location.reload(); };
 
-// 初始載入：自動抽一張情境
-drawBtn.click();
-
-// 手機：切換左側選單
+// 初始載入：預設套用「尾牙活動」案例
 const navToggle = document.querySelector('.navToggle');
 if(navToggle){ navToggle.addEventListener('click', ()=>{ document.querySelector('nav').classList.toggle('open'); }); }
+
+drawScenarioById('year_end');
 
 // Lv1 快速產生器
 function buildClosureScript(){
@@ -595,33 +645,10 @@ function buildClosureScript(){
   const typeSel = document.getElementById('q_type').value || '正常結案';
   const s = state.lv1.scenario;
   const type = typeSel || (s ? s.title : '正常結案');
-  const data = (document.getElementById('q_data').value || '依據專案 KPI 與成本/風險評估').trim();
-  const mit = (document.getElementById('q_mit').value || '已完成資料備援、合約保固與人員安置').trim();
-  const next = (document.getElementById('q_next').value || '下週三完成移交、下週五提交結案報告').trim();
-  const contact = (document.getElementById('q_contact').value || 'PM 王小明（pm@example.com）').trim();
-  const lines = [
-    `1) 親愛的${aud}，本專案將採取「${type}」，交付物為「${s? s.deliverable: 'V1 交付物'}」。`,
-    `2) 決策依據：${data}。`,
-    `3) 風險與影響：已評估為可接受，並設定對策。`,
-    `4) 補救與支援：${mit}。`,
-    `5) 後續里程碑：${next}。`,
-    `6) 聯絡窗口：${contact}。`
-  ].join('
-');
-  document.getElementById('closureScript').value = lines;
-}
-const qb = document.getElementById('quickBuild');
-if(qb){ qb.addEventListener('click', (e)=>{ e.preventDefault(); buildClosureScript(); }); }
-
-// Lv1 快速產生器
-function buildClosureScript(){
-  const aud = document.getElementById('q_aud').value || '全體同仁';
-  const type = document.getElementById('q_type').value || (state.lv1.scenario?state.lv1.scenario.title:'正常結案');
-  const data = (document.getElementById('q_data').value || '依據專案KPI與成本/風險評估').trim();
-  const mit = (document.getElementById('q_mit').value || '已完成資料備援、合約保固與人員安置').trim();
-  const next = (document.getElementById('q_next').value || '下週三完成移交、下週五提交結案報告').trim();
-  const contact = (document.getElementById('q_contact').value || 'PM 王小明（pm@example.com）').trim();
-  const s = state.lv1.scenario;
+  const data = (document.getElementById('q_data').value || '出席/滿意度/成本差異等KPI').trim();
+  const mit = (document.getElementById('q_mit').value || '名單遮罩公開、未領獎品郵寄、媒體授權補簽').trim();
+  const next = (document.getElementById('q_next').value || '本週五完成對帳、下週三上架相簿/影片、下週五提交結案報告').trim();
+  const contact = (document.getElementById('q_contact').value || '行政處專案管理室（PM 王小明，pm@example.com）').trim();
   const lines = [
     `1) 親愛的${aud}，本專案將採取「${type}」，交付物為「${s? s.deliverable: 'V1 交付物'}」。`,
     `2) 決策依據：${data}。`,
