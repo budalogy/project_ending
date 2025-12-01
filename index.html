@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OPA 專案資產歸檔模擬器 (傳播/策展版)</title>
+    <title>OPA 專案資產歸檔模擬器 (完整版)</title>
     
     <!-- React & ReactDOM -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
@@ -60,6 +60,10 @@
         /* Neon effects for Event vibe */
         .neon-text {
             text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+        
+        .glow-border {
+            box-shadow: 0 0 15px rgba(236, 72, 153, 0.3);
         }
     </style>
 </head>
@@ -171,6 +175,56 @@
                         reason: '除非要做「廚餘量分析」，否則這只是垃圾。真正有價值的是「便當數量統計表」而非垃圾本身。'
                     }
                 ]
+            },
+            {
+                id: 'S03',
+                title: '專案：Galaxy S25 旗艦機新品發表會',
+                status: 'COMPLETED', 
+                statusText: '超支結案',
+                description: '發表會畫面華麗，媒體曝光度極高。但因執行期間 CEO 臨時要求增加「全息投影」特效，導致硬體預算嚴重超支 30%，且與廠商有追加款項爭議。',
+                feedback: '面對「成功但失控」的專案，歸檔重點在於「預算分析」與「變更控制紀錄」，以保護 PM 未來免受責難。',
+                artifacts: [
+                    { 
+                        id: 'c1', 
+                        name: '全息投影硬體架設圖', 
+                        type: 'image', 
+                        desc: '這套投影架構非常新穎，雖然貴，但效果震撼全場。',
+                        correctTarget: 'tool', 
+                        tags: ['硬體架構', '創新科技', '特效廠商清單'],
+                        wrongTags: ['超支原因', '投影圖', '現場照片'],
+                        reason: '創新的硬體架構是公司的技術資產。保留下來，下次如果預算充足，可以直接套用。'
+                    },
+                    { 
+                        id: 'c2', 
+                        name: '預算追加差異分析報告 (Variance Analysis)', 
+                        type: 'doc', 
+                        desc: '詳細列出預算超支是因為「高層臨時變更」而非 PM 估算錯誤。',
+                        correctTarget: 'lesson', 
+                        tags: ['成本管理', '預算差異分析', '變更紀錄'],
+                        wrongTags: ['結案報告', '請款單', '檢討報告'],
+                        reason: '這是 PM 的保命符，也是重要的教訓：未來面對高層臨時需求，必須先簽核「預算變更單」。'
+                    },
+                    { 
+                        id: 'c3', 
+                        name: '舊版流程 Run-down (v1~v5)', 
+                        type: 'doc', 
+                        desc: '被修改過無數次的舊版流程表，跟最終版完全不同。',
+                        correctTarget: 'trash', 
+                        tags: ['過期文件', '舊版', '作廢'],
+                        wrongTags: ['參考流程', '完整紀錄', '備份'],
+                        reason: '容易混淆的舊版本應清除或封存至冷資料區，OPA 只需保留「最終執行版 (Final Version)」。'
+                    },
+                    { 
+                        id: 'c4', 
+                        name: '緊急追加報價單 & 議價紀錄', 
+                        type: 'doc', 
+                        desc: '為了趕工，跟廠商緊急協調後的報價紀錄與合約增補條款。',
+                        correctTarget: 'process', 
+                        tags: ['緊急採購流程', '合約變更SOP', '議價案例'],
+                        wrongTags: ['報價單', '廠商合約', '發票'],
+                        reason: '這次的緊急採購雖然混亂，但建立了一個「緊急應變採購模式」，可優化為組織的緊急採購 SOP。'
+                    }
+                ]
             }
         ];
 
@@ -191,25 +245,41 @@
 
         // --- Main Component ---
         const App = () => {
-            const [stage, setStage] = useState('start');
+            const [stage, setStage] = useState('start'); // start, game, tagging, result, finalReport
+            const [scenarioIndex, setScenarioIndex] = useState(0);
             const [scenario, setScenario] = useState(null);
             const [currentArtifactIndex, setCurrentArtifactIndex] = useState(0);
             const [decisions, setDecisions] = useState({}); 
             const [selectedTag, setSelectedTag] = useState(null);
-            
-            // Start Game
+            const [totalHistory, setTotalHistory] = useState([]); // Array of result logs from all scenarios
+
+            // Start Game (Reset everything)
             const startGame = () => {
-                const randomScenario = SCENARIOS[Math.floor(Math.random() * SCENARIOS.length)];
-                setScenario(randomScenario);
+                setScenarioIndex(0);
+                setTotalHistory([]);
+                loadScenario(0);
+            };
+
+            const loadScenario = (index) => {
+                setScenario(SCENARIOS[index]);
                 setStage('game');
                 setCurrentArtifactIndex(0);
                 setDecisions({});
             };
 
-            // Handle Sorting Selection
+            const nextScenario = () => {
+                const nextIndex = scenarioIndex + 1;
+                if (nextIndex < SCENARIOS.length) {
+                    setScenarioIndex(nextIndex);
+                    loadScenario(nextIndex);
+                } else {
+                    setStage('finalReport');
+                }
+            };
+
+            // Handle Sorting
             const handleSort = (targetId) => {
                 const currentArtifact = scenario.artifacts[currentArtifactIndex];
-                
                 const newDecisions = { ...decisions };
                 newDecisions[currentArtifact.id] = { target: targetId, tag: null };
                 setDecisions(newDecisions);
@@ -222,7 +292,7 @@
                 }
             };
 
-            // Handle Tag Selection
+            // Handle Tagging
             const handleTag = (tag) => {
                 const currentArtifact = scenario.artifacts[currentArtifactIndex];
                 const newDecisions = { ...decisions };
@@ -243,8 +313,8 @@
                 }
             };
 
-            // Calculate Score
-            const calculateResult = () => {
+            // Calculate Single Scenario Result
+            const calculateScenarioResult = () => {
                 let score = 0;
                 let log = [];
 
@@ -266,22 +336,22 @@
                     // Tag Check logic
                     if (artifact.correctTarget !== 'trash') {
                         if (decision.target === 'trash') {
-                             message = "您丟棄了珍貴的活動資產！";
+                             message = "丟棄了珍貴資產！";
                              itemScore -= 5;
                              isCorrect = false;
                         } else if (artifact.tags.includes(decision.tag)) {
                             itemScore += 10;
-                            message += " 關鍵字設定精準，未來策展人成功搜尋到此資料。";
+                            message += " 關鍵字精準。";
                         } else if (decision.target === artifact.correctTarget) {
                             itemScore += 5;
-                            message += " 但標籤過於模糊，資料庫大海撈針。";
+                            message += " 標籤模糊。";
                         }
                     } else {
                          if (decision.target !== 'trash') {
-                             message = "保留了活動雜訊，增加資料庫負擔。";
+                             message = "保留了雜訊。";
                              itemScore -= 5;
                          } else {
-                             message = "成功清除雜訊。";
+                             message = "成功清除。";
                              itemScore += 5; 
                          }
                     }
@@ -297,27 +367,39 @@
                     });
                 });
 
-                return { score, log };
+                return { score, log, scenarioTitle: scenario.title };
             };
 
+            // Save result to history when entering result screen
+            useEffect(() => {
+                if (stage === 'result') {
+                    const result = calculateScenarioResult();
+                    setTotalHistory(prev => [...prev, result]);
+                }
+            }, [stage]);
+
             return (
-                /* Changed: overflow-hidden to overflow-y-auto, added w-full, removed fixed centered flex for better mobile scrolling */
                 <div className="min-h-screen w-full flex flex-col items-center p-4 relative overflow-y-auto overflow-x-hidden text-slate-200">
-                    {/* Background Elements - Fixed Position */}
+                    {/* Background Elements */}
                     <div className="fixed inset-0 w-full h-full -z-20 opacity-50 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none"></div>
                     <div className="fixed w-[500px] h-[500px] bg-pink-600/20 rounded-full blur-[100px] -top-20 -left-20 animate-pulse pointer-events-none"></div>
                     <div className="fixed w-[500px] h-[500px] bg-cyan-600/20 rounded-full blur-[100px] bottom-20 right-20 animate-pulse pointer-events-none" style={{animationDelay: '1s'}}></div>
-                    
-                    {/* Background Gradient */}
                     <div className="fixed inset-0 -z-30 bg-gradient-to-br from-[#1a1a1a] via-[#2a2a2a] to-[#1a1a1a] pointer-events-none"></div>
 
-                    {/* Header - now relative to flow with content */}
-                    <header className="w-full max-w-5xl flex items-center gap-2 text-slate-400 mb-8 pt-4">
-                        <Icon name="archive" className="text-pink-500" />
-                        <span className="font-bold tracking-widest text-sm uppercase">Event OPA Simulator</span>
+                    {/* Header */}
+                    <header className="w-full max-w-5xl flex items-center justify-between gap-2 text-slate-400 mb-8 pt-4">
+                        <div className="flex items-center gap-2">
+                            <Icon name="archive" className="text-pink-500" />
+                            <span className="font-bold tracking-widest text-sm uppercase">Event OPA Simulator</span>
+                        </div>
+                        {stage !== 'start' && stage !== 'finalReport' && (
+                            <div className="text-xs font-mono bg-slate-800 px-3 py-1 rounded-full border border-slate-700">
+                                進度：專案 {scenarioIndex + 1} / {SCENARIOS.length}
+                            </div>
+                        )}
                     </header>
 
-                    {/* Content Area with padding bottom */}
+                    {/* Content Area */}
                     <div className="w-full flex flex-col items-center justify-center flex-1 pb-12">
                         {stage === 'start' && <StartScreen onStart={startGame} />}
                         {stage === 'game' && scenario && (
@@ -336,8 +418,15 @@
                         )}
                         {stage === 'result' && (
                             <ResultScreen 
-                                result={calculateResult()} 
-                                onRestart={() => setStage('start')} 
+                                result={calculateScenarioResult()} 
+                                isLast={scenarioIndex === SCENARIOS.length - 1}
+                                onNext={nextScenario} 
+                            />
+                        )}
+                        {stage === 'finalReport' && (
+                            <FinalReportScreen 
+                                history={totalHistory}
+                                onRestart={startGame}
                             />
                         )}
                     </div>
@@ -354,16 +443,16 @@
                 </div>
                 <h1 className="text-4xl font-bold mb-4 text-white neon-text">專案結束與歸檔</h1>
                 <p className="text-slate-300 mb-8 leading-relaxed text-lg">
-                    活動結束，撤場完成，但你的工作還沒結束。<br/>
-                    <span className="text-pink-400 font-semibold">Technical Rider</span>、<span className="text-cyan-400 font-semibold">KOL名單</span>、<span className="text-yellow-400 font-semibold">慘痛教訓</span>...<br/><br/>
-                    請判斷哪些是該留給未來的「寶藏」，哪些只是該丟進垃圾桶的「回憶」。
+                    在接下來的挑戰中，你將經歷 <span className="text-pink-400 font-bold">3 個不同的專案情境</span>。<br/>
+                    無論是腰斬的展覽、混亂的音樂節，還是超支的發表會，你的任務只有一個：<br/>
+                    <span className="text-cyan-400 font-semibold">為未來的自己留下最有價值的資產。</span>
                 </p>
                 <button 
                     onClick={onStart}
                     className="w-full bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white font-bold py-4 px-6 rounded-xl transition-all transform hover:scale-105 hover:shadow-xl flex items-center justify-center gap-2 group text-lg"
                 >
                     <Icon name="play" className="group-hover:fill-current" />
-                    進入撤場階段
+                    開始歸檔挑戰
                 </button>
             </div>
         );
@@ -394,9 +483,7 @@
                         <div className="text-slate-500 font-mono text-sm bg-black/30 px-3 py-1 rounded">{progress}</div>
                     </div>
 
-                    {/* Changed: Removed fixed h-[500px], used min-h to allow growth */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch min-h-[500px]">
-                        {/* Artifact Card - Resized smaller */}
                         <div className="flex justify-center h-full items-center py-4">
                             <div className="bg-gradient-to-b from-slate-800 to-slate-900 border border-slate-700 p-6 rounded-2xl shadow-2xl w-full max-w-sm hover:border-pink-500 transition-all relative group flex flex-col items-center text-center justify-center h-full min-h-[320px]">
                                 <div className="absolute -top-3 bg-black px-4 py-1 rounded-full border border-slate-700 text-xs text-pink-400 uppercase tracking-wider font-bold">
@@ -410,7 +497,6 @@
                             </div>
                         </div>
 
-                        {/* Targets */}
                         <div className="grid grid-cols-2 gap-4 h-full content-center">
                             {TARGETS.map(target => (
                                 <button 
@@ -464,48 +550,37 @@
             );
         };
 
-        const ResultScreen = ({ result, onRestart }) => {
-            const futureDate = new Date();
-            futureDate.setFullYear(futureDate.getFullYear() + 3);
-            const futureDateStr = futureDate.toLocaleDateString('zh-TW', { year: 'numeric', month: 'long' });
-
+        const ResultScreen = ({ result, isLast, onNext }) => {
             return (
                 <div className="w-full max-w-4xl animate-fade-in pb-10">
                     <div className="text-center mb-10">
                         <div className="inline-block px-5 py-2 rounded-full bg-cyan-900/30 text-cyan-300 text-sm font-mono mb-6 border border-cyan-800">
-                            時間來到：{futureDateStr}
+                            本階段分數
                         </div>
-                        <h2 className="text-5xl font-bold text-white mb-4">結算報告</h2>
-                        <div className="text-7xl font-black text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-cyan-400 my-6">
+                        <h2 className="text-4xl font-bold text-white mb-2">{result.scenarioTitle}</h2>
+                        <div className="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-cyan-400 my-4">
                             {result.score} <span className="text-3xl text-slate-500">分</span>
                         </div>
-                        <p className="text-slate-400 max-w-xl mx-auto text-lg">
-                            {result.score > 30 
-                                ? "太棒了！你的歸檔成為公司的寶庫。新人策展人拿著你的 SOP 和名單，成功避開地雷，辦出了完美的活動！" 
-                                : result.score > 0 
-                                    ? "表現尚可。部分名單和教訓被保留了，但雜亂的分類讓找資料變得有點像在垃圾堆裡尋寶。" 
-                                    : "災難！未來的團隊找不到場地圖，也不知道為什麼當初會被罰款，導致悲劇再次重演。"}
-                        </p>
                     </div>
 
                     <div className="grid grid-cols-1 gap-4 mb-10">
                         {result.log.map((item, idx) => (
-                            <div key={idx} className={`p-5 rounded-xl border ${item.isCorrect ? 'bg-slate-800/80 border-green-500/30' : 'bg-red-900/10 border-red-500/30'} flex flex-col md:flex-row gap-5 items-start`}>
-                                <div className={`p-3 rounded-lg ${item.isCorrect ? 'bg-green-500/10 text-green-400' : 'bg-red-500/10 text-red-400'}`}>
-                                    <Icon name={item.isCorrect ? 'check' : 'alert-triangle'} size={24} />
+                            <div key={idx} className={`p-4 rounded-xl border ${item.isCorrect ? 'bg-slate-800/80 border-green-500/30' : 'bg-red-900/10 border-red-500/30'} flex flex-col md:flex-row gap-4 items-start`}>
+                                <div className={`p-2 rounded-lg ${item.isCorrect ? 'bg-green-500/10 text-green-400' : 'bg-red-500/10 text-red-400'}`}>
+                                    <Icon name={item.isCorrect ? 'check' : 'alert-triangle'} size={20} />
                                 </div>
                                 <div className="flex-1">
-                                    <div className="flex justify-between items-start mb-2">
-                                        <h4 className="font-bold text-white text-lg">{item.name}</h4>
-                                        <span className={`font-bold px-3 py-1 rounded text-sm ${item.score > 0 ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
+                                    <div className="flex justify-between items-start mb-1">
+                                        <h4 className="font-bold text-white text-base">{item.name}</h4>
+                                        <span className={`font-bold px-2 py-0.5 rounded text-xs ${item.score > 0 ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
                                             {item.score > 0 ? '+' : ''}{item.score}
                                         </span>
                                     </div>
-                                    <div className="text-base text-slate-300 mb-3">
-                                        你的決策：<span className="font-mono text-xs bg-slate-700 px-2 py-1 rounded mx-1 align-middle">{item.userChoice || 'N/A'}</span> 
+                                    <div className="text-sm text-slate-300 mb-2">
+                                        <span className="font-mono text-xs bg-slate-700 px-2 py-1 rounded mx-1">{item.userChoice || 'N/A'}</span> 
                                         {item.message}
                                     </div>
-                                    <div className="text-sm text-slate-400 bg-black/20 p-3 rounded border border-white/5">
+                                    <div className="text-xs text-slate-400 bg-black/20 p-2 rounded border border-white/5">
                                         <strong className="text-cyan-400">OPA 觀點：</strong> {item.reason}
                                     </div>
                                 </div>
@@ -515,11 +590,105 @@
 
                     <div className="flex justify-center">
                         <button 
+                            onClick={onNext}
+                            className="bg-slate-700 hover:bg-slate-600 text-white font-bold py-4 px-10 rounded-xl transition-all flex items-center gap-3 text-lg border border-slate-600 hover:border-white/50 glow-border"
+                        >
+                            {isLast ? "查看最終歸檔報告" : "進入下一個專案"}
+                            <Icon name="arrow-right" size={20} />
+                        </button>
+                    </div>
+                </div>
+            );
+        };
+
+        const FinalReportScreen = ({ history, onRestart }) => {
+            const totalScore = history.reduce((acc, curr) => acc + curr.score, 0);
+            
+            return (
+                <div className="w-full max-w-4xl animate-fade-in pb-10">
+                    <div className="glass-panel p-8 rounded-2xl mb-8 border-t-4 border-pink-500">
+                        <div className="text-center">
+                            <h2 className="text-3xl font-bold text-white mb-2">組織資產歸檔 - 最終報告</h2>
+                            <p className="text-slate-400 mb-6">3 個專案的綜合評估結果</p>
+                            
+                            <div className="flex justify-center items-end gap-2 mb-6">
+                                <span className="text-8xl font-black text-transparent bg-clip-text bg-gradient-to-r from-pink-400 via-purple-400 to-cyan-400">
+                                    {totalScore}
+                                </span>
+                                <span className="text-2xl text-slate-500 mb-4">/ 300 分</span>
+                            </div>
+
+                            <div className="bg-slate-800/50 p-6 rounded-xl text-left max-w-2xl mx-auto border border-slate-700">
+                                <h3 className="text-xl font-bold text-white mb-3 flex items-center gap-2">
+                                    <Icon name="user-check" className="text-cyan-400" />
+                                    專家點評
+                                </h3>
+                                <p className="text-slate-300 leading-relaxed">
+                                    {totalScore > 240 
+                                        ? "完美！你具備了極佳的知識管理意識。不僅懂得區分什麼是「垃圾」與「資產」，更懂得透過標籤化（Tagging）讓未來的團隊能快速取用。你是組織中不可或缺的成熟 PM！" 
+                                        : totalScore > 150 
+                                            ? "表現不錯。你大致掌握了歸檔的邏輯，但在「經驗教訓（Lessons Learned）」的提煉上還可以更精準。記得，失敗的經驗往往比成功的檔案更有價值。" 
+                                            : "還有進步空間。你的歸檔策略可能會導致資料庫充斥雜訊，或者重要經驗流失。建議重新複習 OPA 的三大分類原則。"}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Educational Content Section */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+                        <div className="bg-slate-800 p-6 rounded-xl border border-slate-700">
+                            <h3 className="text-lg font-bold text-pink-400 mb-4 flex items-center gap-2">
+                                <Icon name="alert-circle" />
+                                為什麼要做經驗歸檔？
+                            </h3>
+                            <p className="text-sm text-slate-300 mb-4">
+                                專案結束（Closing）不只是慶功宴。無論專案是正常結束、還是意外腰斬，如果不做歸檔，組織就會失憶，永遠在重複犯同樣的錯。
+                            </p>
+                            <ul className="text-sm text-slate-400 list-disc list-inside space-y-1">
+                                <li>避免重複造輪子（如：重寫一樣的企劃書）</li>
+                                <li>避免重複踩雷（如：再次找同一家雷廠商）</li>
+                                <li>新人訓練成本降低</li>
+                            </ul>
+                        </div>
+
+                        <div className="bg-slate-800 p-6 rounded-xl border border-slate-700">
+                            <h3 className="text-lg font-bold text-cyan-400 mb-4 flex items-center gap-2">
+                                <Icon name="check-square" />
+                                歸檔的標準動作 (OPA)
+                            </h3>
+                            <div className="space-y-3">
+                                <div className="flex gap-3">
+                                    <div className="mt-1 bg-cyan-900/50 p-1 rounded text-cyan-300"><Icon name="file-text" size={16} /></div>
+                                    <div>
+                                        <h4 className="text-white font-bold text-sm">1. 專案檔案 (Project Files)</h4>
+                                        <p className="text-xs text-slate-400">最終版的合約、驗收單、設計圖、名單。記得清除中間過程的雜訊。</p>
+                                    </div>
+                                </div>
+                                <div className="flex gap-3">
+                                    <div className="mt-1 bg-purple-900/50 p-1 rounded text-purple-300"><Icon name="git-merge" size={16} /></div>
+                                    <div>
+                                        <h4 className="text-white font-bold text-sm">2. 流程與SOP更新</h4>
+                                        <p className="text-xs text-slate-400">如果這次發現原本的 SOP 不好用，請修正它，讓下個人用更好的版本。</p>
+                                    </div>
+                                </div>
+                                <div className="flex gap-3">
+                                    <div className="mt-1 bg-yellow-900/50 p-1 rounded text-yellow-300"><Icon name="book-open" size={16} /></div>
+                                    <div>
+                                        <h4 className="text-white font-bold text-sm">3. 經驗教訓 (Lessons Learned)</h4>
+                                        <p className="text-xs text-slate-400">這是最重要的。記錄「發生了什麼」、「原因」、「未來如何預防」。</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="flex justify-center">
+                        <button 
                             onClick={onRestart}
                             className="bg-slate-700 hover:bg-slate-600 text-white font-bold py-4 px-10 rounded-xl transition-all flex items-center gap-3 text-lg border border-slate-600 hover:border-white/50"
                         >
                             <Icon name="rotate-ccw" size={20} />
-                            挑戰下一個活動專案
+                            重新挑戰
                         </button>
                     </div>
                 </div>
