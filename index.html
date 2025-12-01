@@ -1,667 +1,533 @@
-<!doctype html>
-<html lang="zh-Hant">
+<!DOCTYPE html>
+<html lang="zh-TW">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Project Closure Quest｜專案終止 × 組織記憶（尾牙案例版）</title>
-  <style>
-    :root { --bg:#0f172a; --card:#111827; --ink:#e5e7eb; --ink2:#cbd5e1; --accent:#22d3ee; --muted:#475569; --ok:#22c55e; --warn:#f59e0b; --bad:#ef4444; }
-    html,body{margin:0;height:100%;font-family: system-ui, -apple-system, "Segoe UI", Roboto, Noto Sans TC, Arial, sans-serif;background:var(--bg);color:var(--ink);} 
-    .app{display:flex;flex-direction:column;min-height:100%}
-    header{position:sticky;top:0;background:linear-gradient(180deg,#0b1222, #0f172a);border-bottom:1px solid #1f2937;z-index:5}
-    .bar{display:flex;align-items:center;gap:.75rem;padding:.75rem 1rem;flex-wrap:wrap}
-    .title{font-weight:700;letter-spacing:.3px}
-    .pill{padding:.35rem .6rem;border-radius:999px;background:#0b1222;border:1px solid #1f2937;color:var(--ink2);font-size:.85rem}
-    .score{margin-left:auto;display:flex;gap:.5rem;align-items:center}
-    .btn{background:#0b1222;border:1px solid #1f2937;color:var(--ink);padding:.5rem .8rem;border-radius:.6rem;cursor:pointer}
-    .btn:hover{border-color:#334155}
-    .primary{background:linear-gradient(180deg,#0ea5e9,#0891b2);border-color:#0ea5e9}
-    main{display:grid;grid-template-columns:260px 1fr;gap:1rem;padding:1rem}
-    nav{position:sticky;top:62px;align-self:start}
-    .card{background:var(--card);border:1px solid #1f2937;border-radius:14px;padding:1rem}
-    .nav a{display:flex;align-items:center;gap:.5rem;padding:.55rem .6rem;margin:.25rem 0;color:var(--ink2);text-decoration:none;border-radius:.5rem}
-    .nav a.active{background:#0b1222;color:var(--ink);border:1px solid #334155}
-    .tag{font-size:.75rem;color:var(--ink2);border:1px dashed #334155;border-radius:6px;padding:.15rem .4rem}
-    h2{margin:.2rem 0 1rem 0}
-    section{display:none}
-    section.active{display:block}
-    .cols{display:grid;grid-template-columns:repeat(3,1fr);gap:.75rem}
-    .col{min-height:240px;background:#0b1222;border:1px dashed #334155;border-radius:10px;padding:.5rem}
-    .hint{color:var(--ink2);font-size:.9rem}
-    .item{background:#0f1a33;border:1px solid #334155;border-radius:10px;padding:.5rem;margin:.4rem 0;cursor:grab}
-    .ok{color:var(--ok)} .warn{color:var(--warn)} .bad{color:var(--bad)}
-    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
-    label{display:block;margin:.35rem 0 .2rem .1rem;color:var(--ink2);font-size:.9rem}
-    input[type="text"], textarea, select{width:100%;padding:.6rem;border-radius:.6rem;border:1px solid #334155;background:#0b1222;color:var(--ink)}
-    textarea{min-height:120px}
-    .list{display:grid;grid-template-columns:1fr;gap:.4rem}
-    .check{display:flex;align-items:flex-start;gap:.6rem;padding:.4rem;border:1px solid #334155;border-radius:.6rem;background:#0b1222}
-    .muted{color:var(--muted);font-size:.85rem}
-    .kbd{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;background:#0b1222;border:1px solid #334155;padding:.15rem .35rem;border-radius:6px;font-size:.85rem;color:var(--ink2)}
-    .row{display:flex;gap:.5rem;flex-wrap:wrap}
-    .flex{display:flex;gap:.5rem;align-items:center}
-    .right{margin-left:auto}
-    .table{width:100%;border-collapse:collapse}
-    .table th,.table td{border:1px solid #334155;padding:.5rem;text-align:left}
-    .small{font-size:.85rem}
-    footer{padding:1rem;color:var(--ink2)}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OPA 專案資產歸檔模擬器 (傳播/策展版)</title>
+    
+    <!-- React & ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    
+    <!-- Babel for JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap');
+        
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #1a1a1a;
+            color: #e2e8f0;
+            margin: 0;
+            padding: 0;
+        }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #2d2d2d; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #525252; 
+            border-radius: 4px;
+        }
 
-    /* 手機優化：左側縮到頂部、內容全寬、選項更易讀 */
-    @media (max-width: 900px){
-      main{grid-template-columns:1fr}
-      nav{position:static; display:none}
-      nav.open{display:block}
-      .navToggle{display:block}
-      .grid2{grid-template-columns:1fr}
-      .cols{grid-template-columns:1fr}
-      .check{flex-direction:column;align-items:flex-start}
-      textarea{min-height:160px}
-      .bar{gap:.5rem}
-    }
-  </style>
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .glass-panel {
+            background: rgba(40, 40, 40, 0.8);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Neon effects for Event vibe */
+        .neon-text {
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+    </style>
 </head>
 <body>
-<div class="app">
-  <header>
-    <div class="bar">
-      <button class="btn navToggle" aria-label="切換選單" style="display:none">≡</button>
-      <div class="title">Project Closure Quest</div>
-      <span class="pill">專案終止 × 組織記憶（6輪）</span>
-      <span class="pill">單檔版 · 免安裝</span>
-      <div class="score"><span>分數：</span><strong id="score">0</strong>
-        <button class="btn" id="exportMd">匯出成果</button>
-        <button class="btn" id="reset">重置</button>
-      </div>
-    </div>
-  </header>
-  <main>
-    <nav>
-      <div class="card nav" id="nav"></div>
-      <div class="card small">
-        <div class="hint">操作提示</div>
-        <ul>
-          <li>依左側選單依序闖關；每關完成會加分。</li>
-          <li>可隨時點「匯出成果」下載 Markdown 報告。</li>
-          <li>本檔可直接放 GitHub Pages，檔名 <span class="kbd">index.html</span>。</li>
-        </ul>
-      </div>
-      <div class="card small">
-        <div class="hint">案例切換</div>
-        <div class="row">
-          <select id="caseSelect">
-            <option value="year_end">尾牙活動（預設）</option>
-            <option value="normal">一般產品專案（正常結案）</option>
-            <option value="early">策略轉向（提前終止）</option>
-            <option value="cancel">合規風險（取消/中止）</option>
-            <option value="bau">轉移至維運（BAU）</option>
-          </select>
-          <button class="btn" id="applyCase">套用案例</button>
-        </div>
-      </div>
-    </nav>
-    <div>
-      <!-- Lv1 情境與決策樹 -->
-      <section id="lv1" class="card active">
-        <h2>Lv1｜終止情境 × 決策樹</h2>
-        <p class="hint">抽一張情境卡（或在左側選案例），回答二分問題，產出 6 句話終止溝通稿。</p>
-        <div class="row">
-          <button class="btn" id="drawScenario">抽情境卡</button>
-          <span id="scenarioTag" class="tag"></span>
-        </div>
-        <div id="scenarioBox" class="card" style="margin-top: .8rem"></div>
-        <div id="decisionBox" class="list" style="margin-top:.6rem"></div>
-        <label>你的 6 句話終止溝通稿</label>
-        <textarea id="closureScript" placeholder="1) 決策事實…
-2) 終止理由（以數據）…
-3) 風險控管…
-4) 對受影響者安排…
-5) 後續里程碑…
-6) 聯絡窗口…"></textarea>
-        <div class="card small" style="margin:.6rem 0">
-          <div class="hint">快速產生器（點選下列選項，按下方按鈕即可自動產生 6 句話）</div>
-          <div class="grid2">
-            <div>
-              <label>受眾</label>
-              <select id="q_aud">
-                <option value="全體同仁">全體同仁</option>
-                <option value="專案相關干係人">專案相關干係人</option>
-                <option value="客戶與合作夥伴">客戶與合作夥伴</option>
-              </select>
-              <label>終止類型</label>
-              <select id="q_type">
-                <option value="正常結案">正常結案</option>
-                <option value="提前終止">提前終止</option>
-                <option value="取消/中止">取消/中止</option>
-                <option value="移轉至維運（BAU）">移轉至維運（BAU）</option>
-              </select>
-              <label>關鍵數據（成效/成本/風險）</label>
-              <input id="q_data" placeholder="例：出席 482、滿意度 4.5/5、成本差異 +3%" />
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // --- 資料設定 (Event Industry Data) ---
+        
+        const SCENARIOS = [
+            {
+                id: 'S01',
+                title: '專案：Neon City 沉浸式光影藝術展',
+                status: 'TERMINATED', 
+                statusText: '專案腰斬',
+                description: '原定於松菸舉辦的年度大展，因授權金談判破裂，且場地消防安檢兩次未過，於開展前一週緊急喊卡。前期投入的行銷與設計費用全數認賠。',
+                feedback: '策展最怕「死在最後一哩路」。失敗的專案中，場地法規的教訓與設計資產是未來東山再起的關鍵。',
+                artifacts: [
+                    { 
+                        id: 'a1', 
+                        name: '展場動線規劃圖 (AutoCAD)', 
+                        type: 'image', 
+                        desc: '雖然展覽沒辦成，但這套「雙迴路」的動線設計邏輯非常流暢。',
+                        correctTarget: 'tool', 
+                        tags: ['展場設計', '動線規劃', '場地圖Template'],
+                        wrongTags: ['失敗展覽', '施工圖', '松菸平面圖'],
+                        reason: '好的動線邏輯是通用的，將其去識別化後，可作為未來類似展覽的規劃模板。'
+                    },
+                    { 
+                        id: 'a2', 
+                        name: '消防局限期改善通知單.pdf', 
+                        type: 'doc', 
+                        desc: '清楚列出了哪些裝潢材質不符合法規，導致執照發不下來。',
+                        correctTarget: 'lesson', 
+                        tags: ['場地法規', '消防安檢', '風險管理'],
+                        wrongTags: ['公文', '罰單', '政府文件'],
+                        reason: '這是血淋淋的教訓！歸檔此文件能讓未來的策展人知道「哪些材質不能用」，避免重蹈覆徹。'
+                    },
+                    { 
+                        id: 'a3', 
+                        name: '開幕記者會媒體名單 (未發送)', 
+                        type: 'doc', 
+                        desc: '原本預計邀請的 KOL 與記者名單，包含聯絡窗口。',
+                        correctTarget: 'tool', 
+                        tags: ['媒體資料庫', 'KOL名單', '公關資源'],
+                        wrongTags: ['記者會', '聯絡人', '未執行清單'],
+                        reason: '這份名單是透過人脈整理出來的，雖然活動取消，但名單本身是極具價值的公關資產。'
+                    },
+                    { 
+                        id: 'a4', 
+                        name: '展場施工廢棄物清運單據', 
+                        type: 'misc', 
+                        desc: '廠商拆除裝潢後的垃圾清運收據。',
+                        correctTarget: 'trash', 
+                        tags: ['報帳單據', '施工雜支', '財務憑證'], 
+                        wrongTags: ['重要合約', '廠商名單', '展覽紀錄'],
+                        reason: '這屬於財務結報的單據，若無特殊爭議，對未來的策展規劃沒有參考價值，屬於雜訊。'
+                    }
+                ]
+            },
+            {
+                id: 'S02',
+                title: '專案：Summer Vibe 沙灘音樂節',
+                status: 'COMPLETED', 
+                statusText: '順利落幕',
+                description: '活動票房完售，現場氣氛極佳。但因突發暴雨導致進場延誤，且藝人超時演出導致被環保局開罰，後台便當也不夠吃，工作人員怨聲載道。',
+                feedback: '活動辦完不是結束，混亂的現場執行經驗，修正後將成為下一次活動的「完美SOP」。',
+                artifacts: [
+                    { 
+                        id: 'b1', 
+                        name: '活動細流表 (Run-down) Final', 
+                        type: 'doc', 
+                        desc: '包含燈光、音響、藝人上下台的精確時間表，雖然現場有Delay，但格式很完整。',
+                        correctTarget: 'process', 
+                        tags: ['活動SOP', 'Rundown範本', '場控流程'],
+                        wrongTags: ['時間表', '當日流程', '音樂節檔案'],
+                        reason: '將這次混亂中修正過的 Run-down 整理成標準範本，能讓下次的場控更精準。'
+                    },
+                    { 
+                        id: 'b2', 
+                        name: '硬體需求表 (Tech Rider)', 
+                        type: 'doc', 
+                        desc: '主舞台的燈光、音響、電力需求規格書，廠商依此搭建。',
+                        correctTarget: 'tool', 
+                        tags: ['硬體規格', 'Tech Rider', '舞台工程'],
+                        wrongTags: ['廠商報價', '音響清單', '器材表'],
+                        reason: '這是一份專業的規格書，留存下來可作為未來評估類似規模舞台預算的快速參考。'
+                    },
+                    { 
+                        id: 'b3', 
+                        name: '環保局噪音罰單 & 檢討報告', 
+                        type: 'doc', 
+                        desc: '因為超時和分貝過大被開罰的紀錄，以及原因分析。',
+                        correctTarget: 'lesson', 
+                        tags: ['危機處理', '場地風險', '法規限制'],
+                        wrongTags: ['罰款', '檢討會', '收據'],
+                        reason: '針對場地限制的寶貴經驗。未來在此地辦活動時，必須依據此教訓調整音響配置與演出時間。'
+                    },
+                    { 
+                        id: 'b4', 
+                        name: '工作人員吃剩的便當盒', 
+                        type: 'misc', 
+                        desc: '後台休息室堆積如山的垃圾照片。',
+                        correctTarget: 'trash', 
+                        tags: ['現場紀錄', '垃圾', '後台照片'],
+                        wrongTags: ['餐飲紀錄', '便當廠商', '物資清單'],
+                        reason: '除非要做「廚餘量分析」，否則這只是垃圾。真正有價值的是「便當數量統計表」而非垃圾本身。'
+                    }
+                ]
+            }
+        ];
+
+        const TARGETS = [
+            { id: 'tool', name: '資源/工具庫', icon: 'wrench', desc: '可重複使用的設計圖、名單、硬體規格 (Assets)' },
+            { id: 'process', name: '流程/SOP 優化', icon: 'git-merge', desc: 'Rundown 範本、工作手冊更新 (Process)' },
+            { id: 'lesson', name: '經驗/避雷指南', icon: 'book-open', desc: '場地地雷、法規限制、危機處理紀錄 (Lessons)' },
+            { id: 'trash', name: '雜訊回收桶', icon: 'trash-2', desc: '無參考價值的單據、過期手稿 (Noise)' }
+        ];
+
+        // --- Icon Component ---
+        const Icon = ({ name, size = 20, className = "" }) => {
+            React.useEffect(() => {
+                lucide.createIcons();
+            }, [name]);
+            return <i data-lucide={name} width={size} height={size} className={className}></i>;
+        };
+
+        // --- Main Component ---
+        const App = () => {
+            const [stage, setStage] = useState('start');
+            const [scenario, setScenario] = useState(null);
+            const [currentArtifactIndex, setCurrentArtifactIndex] = useState(0);
+            const [decisions, setDecisions] = useState({}); 
+            const [selectedTag, setSelectedTag] = useState(null);
+            
+            // Start Game
+            const startGame = () => {
+                const randomScenario = SCENARIOS[Math.floor(Math.random() * SCENARIOS.length)];
+                setScenario(randomScenario);
+                setStage('game');
+                setCurrentArtifactIndex(0);
+                setDecisions({});
+            };
+
+            // Handle Sorting Selection
+            const handleSort = (targetId) => {
+                const currentArtifact = scenario.artifacts[currentArtifactIndex];
+                
+                const newDecisions = { ...decisions };
+                newDecisions[currentArtifact.id] = { target: targetId, tag: null };
+                setDecisions(newDecisions);
+
+                if (targetId === 'trash') {
+                    nextArtifact();
+                } else {
+                    setStage('tagging');
+                    setSelectedTag(null);
+                }
+            };
+
+            // Handle Tag Selection
+            const handleTag = (tag) => {
+                const currentArtifact = scenario.artifacts[currentArtifactIndex];
+                const newDecisions = { ...decisions };
+                newDecisions[currentArtifact.id].tag = tag;
+                setDecisions(newDecisions);
+                
+                setTimeout(() => {
+                    nextArtifact();
+                }, 300);
+            };
+
+            const nextArtifact = () => {
+                if (currentArtifactIndex + 1 < scenario.artifacts.length) {
+                    setCurrentArtifactIndex(prev => prev + 1);
+                    setStage('game');
+                } else {
+                    setStage('result');
+                }
+            };
+
+            // Calculate Score
+            const calculateResult = () => {
+                let score = 0;
+                let log = [];
+
+                scenario.artifacts.forEach(artifact => {
+                    const decision = decisions[artifact.id];
+                    let itemScore = 0;
+                    let message = "";
+                    let isCorrect = false;
+
+                    // Target Check
+                    if (decision.target === artifact.correctTarget) {
+                        itemScore += 10;
+                        isCorrect = true;
+                        message = "歸類正確！";
+                    } else {
+                        message = "歸類不當。";
+                    }
+
+                    // Tag Check logic
+                    if (artifact.correctTarget !== 'trash') {
+                        if (decision.target === 'trash') {
+                             message = "您丟棄了珍貴的活動資產！";
+                             itemScore -= 5;
+                             isCorrect = false;
+                        } else if (artifact.tags.includes(decision.tag)) {
+                            itemScore += 10;
+                            message += " 關鍵字設定精準，未來策展人成功搜尋到此資料。";
+                        } else if (decision.target === artifact.correctTarget) {
+                            itemScore += 5;
+                            message += " 但標籤過於模糊，資料庫大海撈針。";
+                        }
+                    } else {
+                         if (decision.target !== 'trash') {
+                             message = "保留了活動雜訊，增加資料庫負擔。";
+                             itemScore -= 5;
+                         } else {
+                             message = "成功清除雜訊。";
+                             itemScore += 5; 
+                         }
+                    }
+
+                    score += itemScore;
+                    log.push({
+                        name: artifact.name,
+                        score: itemScore,
+                        message: message,
+                        reason: artifact.reason,
+                        isCorrect: isCorrect,
+                        userChoice: TARGETS.find(t => t.id === decision.target)?.name
+                    });
+                });
+
+                return { score, log };
+            };
+
+            return (
+                /* Changed: overflow-hidden to overflow-y-auto, added w-full, removed fixed centered flex for better mobile scrolling */
+                <div className="min-h-screen w-full flex flex-col items-center p-4 relative overflow-y-auto overflow-x-hidden text-slate-200">
+                    {/* Background Elements - Fixed Position */}
+                    <div className="fixed inset-0 w-full h-full -z-20 opacity-50 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none"></div>
+                    <div className="fixed w-[500px] h-[500px] bg-pink-600/20 rounded-full blur-[100px] -top-20 -left-20 animate-pulse pointer-events-none"></div>
+                    <div className="fixed w-[500px] h-[500px] bg-cyan-600/20 rounded-full blur-[100px] bottom-20 right-20 animate-pulse pointer-events-none" style={{animationDelay: '1s'}}></div>
+                    
+                    {/* Background Gradient */}
+                    <div className="fixed inset-0 -z-30 bg-gradient-to-br from-[#1a1a1a] via-[#2a2a2a] to-[#1a1a1a] pointer-events-none"></div>
+
+                    {/* Header - now relative to flow with content */}
+                    <header className="w-full max-w-5xl flex items-center gap-2 text-slate-400 mb-8 pt-4">
+                        <Icon name="archive" className="text-pink-500" />
+                        <span className="font-bold tracking-widest text-sm uppercase">Event OPA Simulator</span>
+                    </header>
+
+                    {/* Content Area with padding bottom */}
+                    <div className="w-full flex flex-col items-center justify-center flex-1 pb-12">
+                        {stage === 'start' && <StartScreen onStart={startGame} />}
+                        {stage === 'game' && scenario && (
+                            <SortingGame 
+                                scenario={scenario} 
+                                artifact={scenario.artifacts[currentArtifactIndex]}
+                                progress={`${currentArtifactIndex + 1} / ${scenario.artifacts.length}`}
+                                onSort={handleSort}
+                            />
+                        )}
+                        {stage === 'tagging' && (
+                            <TaggingScreen 
+                                artifact={scenario.artifacts[currentArtifactIndex]}
+                                onTag={handleTag}
+                            />
+                        )}
+                        {stage === 'result' && (
+                            <ResultScreen 
+                                result={calculateResult()} 
+                                onRestart={() => setStage('start')} 
+                            />
+                        )}
+                    </div>
+                </div>
+            );
+        };
+
+        const StartScreen = ({ onStart }) => (
+            <div className="glass-panel p-10 rounded-2xl max-w-lg w-full text-center animate-fade-in border-t-2 border-pink-500/50 my-auto">
+                <div className="mb-6 flex justify-center">
+                    <div className="w-24 h-24 bg-gradient-to-br from-pink-500 to-purple-600 rounded-full flex items-center justify-center shadow-lg shadow-pink-500/30">
+                        <Icon name="mic-2" size={48} className="text-white" />
+                    </div>
+                </div>
+                <h1 className="text-4xl font-bold mb-4 text-white neon-text">策展資產歸檔模擬</h1>
+                <p className="text-slate-300 mb-8 leading-relaxed text-lg">
+                    活動結束，撤場完成，但你的工作還沒結束。<br/>
+                    <span className="text-pink-400 font-semibold">Technical Rider</span>、<span className="text-cyan-400 font-semibold">KOL名單</span>、<span className="text-yellow-400 font-semibold">慘痛教訓</span>...<br/><br/>
+                    請判斷哪些是該留給未來的「寶藏」，哪些只是該丟進垃圾桶的「回憶」。
+                </p>
+                <button 
+                    onClick={onStart}
+                    className="w-full bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white font-bold py-4 px-6 rounded-xl transition-all transform hover:scale-105 hover:shadow-xl flex items-center justify-center gap-2 group text-lg"
+                >
+                    <Icon name="play" className="group-hover:fill-current" />
+                    進入撤場階段
+                </button>
             </div>
-            <div>
-              <label>風險控管與補救</label>
-              <input id="q_mit" placeholder="例：名單遮罩公開；未領獎品郵寄；媒體授權補簽" />
-              <label>後續里程碑（日期）</label>
-              <input id="q_next" placeholder="例：週五完成對帳；下週三上架相簿/影片；下週五提報" />
-              <label>聯絡窗口</label>
-              <input id="q_contact" placeholder="例：行政處專案管理室（PM 王小明）pm@example.com" />
-            </div>
-          </div>
-          <div class="row" style="margin-top:.5rem">
-            <button class="btn" id="quickBuild">用點選快速生成</button>
-          </div>
-        </div>
-        <div class="row">
-          <button class="btn primary" data-finish="lv1">完成此關</button>
-        </div>
-      </section>
+        );
 
-      <!-- Lv2 DOR-Close 拖放 -->
-      <section id="lv2" class="card">
-        <h2>Lv2｜DOR-Close（準備就緒）拖放檢核</h2>
-        <p class="hint">把要件拖進「必備/選配/不需要」。並自訂 3 條。</p>
-        <div class="cols">
-          <div>
-            <div class="hint">候選要件</div>
-            <div id="dorPool"></div>
-            <div class="row">
-              <input id="customDor" placeholder="新增自訂要件…" />
-              <button class="btn" id="addDor">新增</button>
-            </div>
-          </div>
-          <div class="col" data-bucket="必備"><div class="hint">必備</div></div>
-          <div class="col" data-bucket="選配"><div class="hint">選配</div></div>
-          <div class="col" data-bucket="不需要"><div class="hint">不需要</div></div>
-        </div>
-        <div class="row" style="margin-top:.6rem">
-          <button class="btn primary" data-finish="lv2">完成此關</button>
-        </div>
-      </section>
+        const SortingGame = ({ scenario, artifact, progress, onSort }) => {
+            const getArtifactIcon = (type) => {
+                switch(type) {
+                    case 'code': return 'file-code'; 
+                    case 'doc': return 'file-text';
+                    case 'image': return 'image';
+                    case 'misc': return 'coffee';
+                    default: return 'file';
+                }
+            };
 
-      <!-- Lv3 DOD-Close 勾選 -->
-      <section id="lv3" class="card">
-        <h2>Lv3｜DOD-Close（完成定義）挑選</h2>
-        <p class="hint">從候選清單挑 10–12 條，並對 3 條加上「證據型補述」。</p>
-        <div class="grid2">
-          <div>
-            <div class="list" id="dodList"></div>
-          </div>
-          <div>
-            <label>補述（挑 3 條寫證據連結/檔案）</label>
-            <div class="list" id="dodNotes"></div>
-          </div>
-        </div>
-        <div class="row" style="margin-top:.6rem">
-          <button class="btn primary" data-finish="lv3">完成此關</button>
-        </div>
-      </section>
+            return (
+                <div className="w-full max-w-5xl flex flex-col gap-6 animate-fade-in">
+                    <div className="glass-panel p-6 rounded-xl border-l-4 border-cyan-500 flex justify-between items-start">
+                        <div>
+                            <div className="flex items-center gap-3 mb-2">
+                                <span className={`text-sm px-3 py-1 rounded-full font-bold ${scenario.status === 'TERMINATED' ? 'bg-red-500/20 text-red-400 border border-red-500/30' : 'bg-green-500/20 text-green-400 border border-green-500/30'}`}>
+                                    {scenario.statusText}
+                                </span>
+                                <h3 className="text-xl font-bold text-white">{scenario.title}</h3>
+                            </div>
+                            <p className="text-slate-300">{scenario.description}</p>
+                        </div>
+                        <div className="text-slate-500 font-mono text-sm bg-black/30 px-3 py-1 rounded">{progress}</div>
+                    </div>
 
-      <!-- Lv4 Handover 移交模擬 -->
-      <section id="lv4" class="card">
-        <h2>Lv4｜移交接棒模擬</h2>
-        <p class="hint">補齊 Owner、Review Date 與必備資產欄位，完成點交。</p>
-        <div class="grid2">
-          <div>
-            <label>接手單位/Owner</label>
-            <input id="owner" placeholder="e.g., 行政處維運組／王小明" />
-            <label>Review Date（下次複審日）</label>
-            <input id="review" type="date" />
-            <label>存放路徑/連結</label>
-            <input id="repo" placeholder="雲端資料夾或Repo連結" />
-          </div>
-          <div>
-            <div class="hint">必備資產（至少勾 5 項）</div>
-            <div class="list" id="assetList"></div>
-          </div>
-        </div>
-        <div class="row" style="margin-top:.6rem">
-          <button class="btn primary" data-finish="lv4">完成此關</button>
-        </div>
-      </section>
+                    {/* Changed: Removed fixed h-[500px], used min-h to allow growth */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch min-h-[500px]">
+                        {/* Artifact Card */}
+                        <div className="flex justify-center h-full items-center py-4">
+                            <div className="bg-gradient-to-b from-slate-800 to-slate-900 border border-slate-700 p-8 rounded-2xl shadow-2xl w-full max-w-md hover:border-pink-500 transition-all relative group flex flex-col items-center text-center justify-center h-full min-h-[400px]">
+                                <div className="absolute -top-3 bg-black px-4 py-1 rounded-full border border-slate-700 text-xs text-pink-400 uppercase tracking-wider font-bold">
+                                    待處理資產
+                                </div>
+                                <div className="p-6 bg-slate-800 rounded-full mb-6 group-hover:scale-110 transition-transform shadow-inner shadow-black/50">
+                                    <Icon name={getArtifactIcon(artifact.type)} size={64} className="text-cyan-400" />
+                                </div>
+                                <h2 className="text-2xl font-bold text-white mb-4">{artifact.name}</h2>
+                                <p className="text-slate-400 text-base leading-relaxed">{artifact.desc}</p>
+                            </div>
+                        </div>
 
-      <!-- Lv5 Lessons -> Template -->
-      <section id="lv5" class="card">
-        <h2>Lv5｜把教訓變模板（Lessons → SOP/Checklist）</h2>
-        <p class="hint">將心得改寫為可操作步驟與檢核項。</p>
-        <div class="grid2">
-          <div>
-            <label>教訓學習（逐字稿/摘錄）</label>
-            <textarea id="lessonsSrc">1) 抽獎名單未在 T-24h 凍結，臨場手改兩次。
-2) 直播錄影分散三台相機，回收延後。
-3) 合約版本不一致，對帳來回兩次。</textarea>
-          </div>
-          <div>
-            <label>SOP/Checklist（請用「名詞＋動作＋證據」句型）</label>
-            <textarea id="lessonsOut" placeholder="例：抽獎名單 T-24h 凍結（檔名+時間戳），Decision Log 附連結；媒資歸檔表完成（來源/格式/路徑/權限）。"></textarea>
-          </div>
-        </div>
-        <div class="row">
-          <button class="btn" id="autoRewrite">AI 句型小幫手</button>
-          <button class="btn primary right" data-finish="lv5">完成此關</button>
-        </div>
-      </section>
+                        {/* Targets */}
+                        <div className="grid grid-cols-2 gap-4 h-full content-center">
+                            {TARGETS.map(target => (
+                                <button 
+                                    key={target.id}
+                                    onClick={() => onSort(target.id)}
+                                    className="p-6 rounded-xl border border-slate-700 bg-slate-800/40 hover:bg-slate-700 hover:border-cyan-500 transition-all text-left flex flex-col gap-3 group relative overflow-hidden min-h-[160px]"
+                                >
+                                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
+                                    <div className="flex items-center gap-3">
+                                        <div className="p-3 bg-slate-800 rounded-lg group-hover:bg-cyan-600 transition-colors">
+                                            <Icon name={target.icon} size={24} className="text-slate-300 group-hover:text-white" />
+                                        </div>
+                                        <span className="font-bold text-lg text-slate-100">{target.name}</span>
+                                    </div>
+                                    <p className="text-sm text-slate-400 pl-1">{target.desc}</p>
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            );
+        };
 
-      <!-- Lv6 Findability 命名與標籤 -->
-      <section id="lv6" class="card">
-        <h2>Lv6｜找得到測試（命名與標籤）</h2>
-        <p class="hint">為 5 份檔案重命名並加標籤，再做 60 秒搜尋測試（簡化版）。</p>
-        <div class="list" id="fileList"></div>
-        <div class="row" style="margin-top:.6rem">
-          <button class="btn primary" data-finish="lv6">完成此關</button>
-        </div>
-      </section>
+        const TaggingScreen = ({ artifact, onTag }) => {
+            const options = [...artifact.tags, ...artifact.wrongTags].sort(() => Math.random() - 0.5);
 
-      <!-- 總結與匯出預覽 -->
-      <section id="summary" class="card">
-        <h2>總結與匯出</h2>
-        <div id="preview" class="small"></div>
-      </section>
-    </div>
-  </main>
-  <footer>
-    <div class="small">© 2025 Project Closure Quest — 單檔教學版（尾牙案例）。此檔不依賴外部套件，支援 GitHub Pages。</div>
-  </footer>
-</div>
-<script>
-// --- 全域狀態 ---
-const state = {
-  score: 0,
-  finished: {},
-  lv1: { scenario: null, answers: {}, script: "" },
-  lv2: { buckets: {"必備":[],"選配":[],"不需要":[]}},
-  lv3: { chosen: [], notes: {} },
-  lv4: { owner:"", review:"", repo:"", assets:[] },
-  lv5: { src:"", out:"" },
-  lv6: { files: [] }
-};
+            return (
+                <div className="glass-panel p-10 rounded-2xl max-w-lg w-full animate-fade-in shadow-2xl border-t border-cyan-500/30 text-center my-auto">
+                    <div className="mb-6 text-cyan-400 flex justify-center">
+                        <Icon name="tag" size={48} />
+                    </div>
+                    <h2 className="text-3xl font-bold mb-4">設定檢索標籤</h2>
+                    <p className="text-slate-400 mb-8 text-base">
+                        你決定保留「<span className="text-white font-bold">{artifact.name}</span>」。<br/>
+                        為了讓 3 年後的策展人能搜尋到，請貼上最精準的標籤：
+                    </p>
 
-// --- 案例/情境卡 ---
-const scenarios = [
-  { id:"year_end", title:"尾牙活動｜正常結案",
-    deliverable:"場地/餐飲、主持/節目、抽獎系統、直播攝影、結案報告",
-    objective:"活動完成，進行驗收與移交",
-    done_example:"出席482(目標≥450)、滿意度4.5/5、成本差異 +3%",
-    facts:["個資名單需處置","5家供應商對帳待完成","媒體資產分散"],
-    questions:[
-      {k:"mvp", q:"是否達成活動KPI與MVP？"},
-      {k:"risk", q:"合規/個資/媒資風險是否在可接受範圍？"},
-      {k:"stake", q:"主要干係人是否理解並同意結案？"}
-    ]},
-  { id:"normal", title:"功能達成，收尾結案",
-    deliverable:"V1 功能集（報名頁 + 抽獎模組）",
-    objective:"已滿足 MVP，準備驗收與移交",
-    done_example:"UAT 通過、缺陷皆可接受",
-    facts:["EV≈PV","關鍵客戶滿意","技術債低"],
-    questions:[
-      {k:"mvp", q:"是否已達最小可行價值（MVP）？"},
-      {k:"risk", q:"重大風險是否在可接受範圍？"},
-      {k:"alt", q:"是否存在更高 ROI 的替代方案？"}
-    ]},
-  { id:"early", title:"策略轉向，提前終止",
-    deliverable:"剩餘模組（抽獎直播整合）",
-    objective:"終止剩餘開發以釋出資源至新產品線",
-    done_example:"已交付部分維運、未開始項目取消",
-    facts:["新產品線勝出","市場窗口改變","剩餘預算有限"],
-    questions:[
-      {k:"data", q:"是否有數據支持終止優於續推？"},
-      {k:"stake", q:"主要干係人是否理解影響並同意？"},
-      {k:"plan", q:"是否有完善的關閉與移轉計畫？"}
-    ]},
-  { id:"cancel", title:"合規風險，取消/中止",
-    deliverable:"含個資的報名名單",
-    objective:"避免法遵風險擴大並立即關閉資料處理",
-    done_example:"停止蒐集、完成資料銷毀與對外溝通",
-    facts:["GDPR 疑慮","品牌風險","法遵審查未過"],
-    questions:[
-      {k:"comp", q:"是否存在不可接受的法遵/資安缺陷？"},
-      {k:"miti", q:"是否已嘗試合理緩解仍不可行？"},
-      {k:"com", q:"是否擬定對外溝通與補救方案？"}
-    ]},
-  { id:"bau", title:"轉移至維運（BAU）",
-    deliverable:"穩定運作的 V1 系統",
-    objective:"移交給維運單位長期營運",
-    done_example:"SLA/值班與回報機制啟用",
-    facts:["功能穩定","維護成本低","需求長期"],
-    questions:[
-      {k:"sla", q:"是否定義營運 SLA 與維護窗口？"},
-      {k:"handover", q:"資產/帳號/環境是否可移交？"},
-      {k:"metrics", q:"是否設置持續監控與 KPI？"}
-    ]},
-];
+                    <div className="grid grid-cols-1 gap-3 mb-6">
+                        {options.map((tag, idx) => (
+                            <button 
+                                key={idx}
+                                onClick={() => onTag(tag)}
+                                className="w-full py-4 px-6 rounded-xl bg-slate-800 border border-slate-600 hover:border-cyan-500 hover:bg-slate-700 text-slate-200 transition-all flex items-center justify-between group text-lg"
+                            >
+                                <span className="font-mono">#{tag}</span>
+                                <Icon name="check-circle" size={20} className="opacity-0 group-hover:opacity-100 text-cyan-400" />
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            );
+        };
 
-// --- DOR 候選（含尾牙專屬） ---
-const dorPoolData = [
-  "5家供應商對帳資料就緒（估算/實支/發票/尾款）",
-  "個資處置方案（保存或銷毀）與記錄模板就緒",
-  "媒體資產盤點草案（來源/格式/路徑/權限）",
-  "抽獎名單最終版與凍結時間點簽認",
-  "結案公告草稿（內部）",
-  "合約/採購未結義務盤點完成",
-  "財務預估 vs 實際收支盤點完成",
-  "移交對象與 SLA 草案就緒",
-  "資安/法遵/品牌核對清單備妥",
-  "結案文件骨架建立（Closure/Handover/Lessons）",
-  "環境與帳號清冊初稿",
-  "風險殘留清單初稿（Owner/期限）"
-];
+        const ResultScreen = ({ result, onRestart }) => {
+            const futureDate = new Date();
+            futureDate.setFullYear(futureDate.getFullYear() + 3);
+            const futureDateStr = futureDate.toLocaleDateString('zh-TW', { year: 'numeric', month: 'long' });
 
-// --- DOD 候選（含尾牙專屬 good:true/false） ---
-const dodPool = [
-  {t:"供應商對帳完成並附發票/收據/尾款文件連結", good:true},
-  {t:"個資處置完成（保存/銷毀紀錄與連結）", good:true},
-  {t:"媒體資產上架且權限設定完成（路徑）", good:true},
-  {t:"抽獎紀錄與公開名單（遮罩）已存檔", good:true},
-  {t:"正式驗收與簽認完成（附連結）", good:true},
-  {t:"移交完成：Owner/ReviewDate/存放路徑寫明", good:true},
-  {t:"教訓學習會議完成並入庫", good:true},
-  {t:"最終KPI與差異分析定稿", good:true},
-  {t:"風險殘留已指定Owner與追蹤日程", good:true},
-  {t:"結案公告發布（對內/對外）", good:true},
-  {t:"大家都覺得很圓滿", good:false},
-  {t:"好像差不多可以結束了", good:false}
-];
+            return (
+                <div className="w-full max-w-4xl animate-fade-in pb-10">
+                    <div className="text-center mb-10">
+                        <div className="inline-block px-5 py-2 rounded-full bg-cyan-900/30 text-cyan-300 text-sm font-mono mb-6 border border-cyan-800">
+                            時間來到：{futureDateStr}
+                        </div>
+                        <h2 className="text-5xl font-bold text-white mb-4">結算報告</h2>
+                        <div className="text-7xl font-black text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-cyan-400 my-6">
+                            {result.score} <span className="text-3xl text-slate-500">分</span>
+                        </div>
+                        <p className="text-slate-400 max-w-xl mx-auto text-lg">
+                            {result.score > 30 
+                                ? "太棒了！你的歸檔成為公司的寶庫。新人策展人拿著你的 SOP 和名單，成功避開地雷，辦出了完美的活動！" 
+                                : result.score > 0 
+                                    ? "表現尚可。部分名單和教訓被保留了，但雜亂的分類讓找資料變得有點像在垃圾堆裡尋寶。" 
+                                    : "災難！未來的團隊找不到場地圖，也不知道為什麼當初會被罰款，導致悲劇再次重演。"}
+                        </p>
+                    </div>
 
-const assets = [
-  "相簿原始檔（RAW/JPG）＋精選集",
-  "影片素材與剪輯工程檔",
-  "社群貼文素材（圖像、文案）",
-  "抽獎程式/腳本與 README",
-  "合約/保固/授權文件",
-  "決策紀錄（變更/例外/風險）",
-  "報到/座位/流程看板（最終版）",
-  "媒體授權/肖像聲明"
-];
+                    <div className="grid grid-cols-1 gap-4 mb-10">
+                        {result.log.map((item, idx) => (
+                            <div key={idx} className={`p-5 rounded-xl border ${item.isCorrect ? 'bg-slate-800/80 border-green-500/30' : 'bg-red-900/10 border-red-500/30'} flex flex-col md:flex-row gap-5 items-start`}>
+                                <div className={`p-3 rounded-lg ${item.isCorrect ? 'bg-green-500/10 text-green-400' : 'bg-red-500/10 text-red-400'}`}>
+                                    <Icon name={item.isCorrect ? 'check' : 'alert-triangle'} size={24} />
+                                </div>
+                                <div className="flex-1">
+                                    <div className="flex justify-between items-start mb-2">
+                                        <h4 className="font-bold text-white text-lg">{item.name}</h4>
+                                        <span className={`font-bold px-3 py-1 rounded text-sm ${item.score > 0 ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
+                                            {item.score > 0 ? '+' : ''}{item.score}
+                                        </span>
+                                    </div>
+                                    <div className="text-base text-slate-300 mb-3">
+                                        你的決策：<span className="font-mono text-xs bg-slate-700 px-2 py-1 rounded mx-1 align-middle">{item.userChoice || 'N/A'}</span> 
+                                        {item.message}
+                                    </div>
+                                    <div className="text-sm text-slate-400 bg-black/20 p-3 rounded border border-white/5">
+                                        <strong className="text-cyan-400">OPA 觀點：</strong> {item.reason}
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
 
-const messyFiles = [
-  "final_final_video.MOV",
-  "IMG_9981.JPG",
-  "doc1.docx",
-  "尾牙直播_小張_2025.mov",
-  "meeting_notes.txt"
-];
+                    <div className="flex justify-center">
+                        <button 
+                            onClick={onRestart}
+                            className="bg-slate-700 hover:bg-slate-600 text-white font-bold py-4 px-10 rounded-xl transition-all flex items-center gap-3 text-lg border border-slate-600 hover:border-white/50"
+                        >
+                            <Icon name="rotate-ccw" size={20} />
+                            挑戰下一個活動專案
+                        </button>
+                    </div>
+                </div>
+            );
+        };
 
-// --- 導航 ---
-const sections = [
-  {id:"lv1", name:"1 決策樹"},
-  {id:"lv2", name:"2 DOR 拖放"},
-  {id:"lv3", name:"3 DOD 勾選"},
-  {id:"lv4", name:"4 移交模擬"},
-  {id:"lv5", name:"5 教訓→模板"},
-  {id:"lv6", name:"6 找得到"},
-  {id:"summary", name:"總結/匯出"}
-];
-const nav = document.getElementById('nav');
-sections.forEach((s,i)=>{
-  const a=document.createElement('a');
-  a.href="#"; a.textContent=s.name; a.dataset.to=s.id; if(i===0) a.classList.add('active');
-  a.onclick=(e)=>{e.preventDefault(); show(s.id)}; nav.appendChild(a);
-});
-function show(id){
-  document.querySelectorAll('section').forEach(sec=>sec.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-  document.querySelectorAll('.nav a').forEach(a=>a.classList.toggle('active', a.dataset.to===id));
-  if(id==='summary') renderPreview();
-}
-
-// --- 分數 ---
-function addScore(n){ state.score += n; document.getElementById('score').textContent = state.score; }
-
-// --- Lv1 ---
-const drawBtn = document.getElementById('drawScenario');
-const scenarioBox = document.getElementById('scenarioBox');
-const decisionBox = document.getElementById('decisionBox');
-const scenarioTag = document.getElementById('scenarioTag');
-
-function drawScenarioById(id){
-  const s = scenarios.find(x=>x.id===id) || scenarios[0];
-  state.lv1.scenario = s; state.lv1.answers={};
-  scenarioTag.textContent = s.title;
-  scenarioBox.innerHTML = `
-    <div class="small">
-      <div><strong>要結束/移交的交付物：</strong>${s.deliverable}</div>
-      <div><strong>目前狀態：</strong>${s.objective}；<em>完成例：</em>${s.done_example}</div>
-      <div><strong>事實：</strong>${s.facts.map(f=>`<span class='tag'>${f}</span>`).join(' ')}</div>
-    </div>`;
-  decisionBox.innerHTML = '';
-  s.questions.forEach(q=>{
-    const row=document.createElement('div'); row.className='check';
-    row.innerHTML = `<div class="small">${q.q}</div>
-      <div class="right flex">
-        <label class="flex"><input type="radio" name="${q.k}" value="yes"> <span class="small">是</span></label>
-        <label class="flex"><input type="radio" name="${q.k}" value="no"> <span class="small">否</span></label>
-      </div>`;
-    decisionBox.appendChild(row);
-  });
-  document.getElementById('closureScript').placeholder = `1) 決策事實（我們將${s.title}）。
-2) 終止/結案理由（${s.facts[0]}…以數據說明）。
-3) 風險控管（目前風險與對策）。
-4) 受影響對象的補救/資源安排。
-5) 後續里程碑（範例：下週三完成移交）。
-6) 聯絡窗口（單位/姓名/信箱）。`;
-}
-
-drawBtn.onclick = ()=>{
-  const s = scenarios[Math.floor(Math.random()*scenarios.length)];
-  drawScenarioById(s.id);
-};
-
-// 左側案例套用
-const caseSelect = document.getElementById('caseSelect');
-const applyCaseBtn = document.getElementById('applyCase');
-if(applyCaseBtn){ applyCaseBtn.addEventListener('click', ()=> drawScenarioById(caseSelect.value)); }
-
-// --- Lv2 DOR Drag ---
-const dorPoolBox = document.getElementById('dorPool');
-function makeItem(text){ const d=document.createElement('div'); d.className='item'; d.draggable=true; d.textContent=text; d.addEventListener('dragstart',ev=>{ev.dataTransfer.setData('text/plain', text);}); return d; }
-function renderDorPool(){ dorPoolBox.innerHTML=''; dorPoolData.forEach(t=> dorPoolBox.appendChild(makeItem(t))); }
-renderDorPool();
-
-document.querySelectorAll('.col').forEach(col=>{
-  col.addEventListener('dragover', ev=> ev.preventDefault());
-  col.addEventListener('drop', ev=>{
-    ev.preventDefault(); const t = ev.dataTransfer.getData('text/plain');
-    const bucket = col.dataset.bucket; if(!state.lv2.buckets[bucket].includes(t)) state.lv2.buckets[bucket].push(t);
-    const el = makeItem(t); col.appendChild(el);
-  });
-});
-
-document.getElementById('addDor').onclick = ()=>{
-  const v = document.getElementById('customDor').value.trim();
-  if(!v) return; dorPoolData.push(v); renderDorPool(); document.getElementById('customDor').value='';
-};
-
-// --- Lv3 DOD checklist ---
-const dodList = document.getElementById('dodList');
-const dodNotes = document.getElementById('dodNotes');
-function renderDod(){
-  dodList.innerHTML='';
-  dodPool.forEach((d,i)=>{
-    const wrap=document.createElement('div'); wrap.className='check';
-    wrap.innerHTML = `<input type="checkbox" data-i="${i}"> <div>${d.t} ${d.good?'<span class="ok">(可檢核)</span>':'<span class="bad">(不可檢核)</span>'}</div>`;
-    dodList.appendChild(wrap);
-  });
-  dodNotes.innerHTML='';
-  for(let k=0;k<3;k++){ const r=document.createElement('div'); r.className='check'; r.innerHTML=`<input placeholder="條目名稱"> <input placeholder="證據/連結/檔案">`; dodNotes.appendChild(r);}  
-}
-renderDod();
-
-dodList.addEventListener('change', (e)=>{
-  if(e.target.matches('input[type="checkbox"]')){
-    const i=+e.target.dataset.i; const t=dodPool[i].t;
-    if(e.target.checked){ if(!state.lv3.chosen.includes(t)) state.lv3.chosen.push(t); }
-    else{ state.lv3.chosen = state.lv3.chosen.filter(x=>x!==t); }
-  }
-});
-
-// --- Lv4 assets ---
-const assetList = document.getElementById('assetList');
-assets.forEach((a,idx)=>{
-  const row=document.createElement('label'); row.className='check';
-  row.innerHTML = `<input type="checkbox" data-asset="${a}"> <div>${a}</div>`;
-  assetList.appendChild(row);
-});
-assetList.addEventListener('change', (e)=>{
-  if(e.target.matches('input[type="checkbox"]')){
-    const a=e.target.dataset.asset; if(e.target.checked){ if(!state.lv4.assets.includes(a)) state.lv4.assets.push(a);} else { state.lv4.assets = state.lv4.assets.filter(x=>x!==a);} }
-});
-
-// --- Lv5 rewrite helper (簡易規則) ---
-function rewriteLines(txt){
-  return txt.split(/
-+/).map(s=>s.trim()).filter(Boolean).map((s,i)=>{
-    let noun=s.replace(/[。.!?]$/,'');
-    return `${i+1}. ${noun} → 已建立控制與證據（連結/截圖/檔名）`;
-  }).join('
-');
-}
-
-document.getElementById('autoRewrite').onclick=()=>{
-  const src=document.getElementById('lessonsSrc').value; document.getElementById('lessonsOut').value = rewriteLines(src);
-};
-
-// --- Lv6 files rename ---
-const fileList = document.getElementById('fileList');
-function renderFiles(){
-  fileList.innerHTML='';
-  messyFiles.forEach((f,i)=>{
-    const row=document.createElement('div'); row.className='grid2';
-    row.innerHTML = `<div class="check"><div>原檔名：<span class="tag">${f}</span></div></div>
-      <div class="check">
-        <div class="small">新檔名（格式：主題-制品-版本-日期-Owner）</div>
-        <input data-file="${i}" placeholder="例如：尾牙-結案報告-v1.0-2025-12-30-Admin">
-        <div class="small">標籤（≤5，用逗號分隔）</div>
-        <input data-tags="${i}" placeholder="#尾牙,#媒體,#個資,#供應商,#結案">
-      </div>`;
-    fileList.appendChild(row);
-  });
-}
-renderFiles();
-
-// --- 完成關卡 ---
-function finish(id){
-  if(state.finished[id]){ alert('已完成，可重做但不再加分'); return; }
-  // 輕量驗證
-  if(id==='lv1'){
-    document.querySelectorAll('#decisionBox input[type=radio]:checked').forEach(r=>{ state.lv1.answers[r.name]=r.value; });
-    state.lv1.script = document.getElementById('closureScript').value.trim();
-    if(!state.lv1.script) return alert('請寫 6 句話溝通稿（可用上方快速產生器）');
-  }
-  if(id==='lv2'){
-    const need = state.lv2.buckets['必備'] || []; if(need.length<5) return alert('至少放 5 條在「必備」');
-    // 必備應包含三大要件之一
-    const must = ["5家供應商對帳資料就緒（估算/實支/發票/尾款）","個資處置方案（保存或銷毀）與記錄模板就緒","媒體資產盤點草案（來源/格式/路徑/權限)"];
-    if(!must.some(x=>need.includes(x))) alert('建議把「對帳/個資/媒資」至少選一項放入必備');
-  }
-  if(id==='lv3'){
-    const c = state.lv3.chosen.length; if(c<10 || c>12) return alert('請勾選 10–12 條 DOD');
-    const notes=[...document.querySelectorAll('#dodNotes .check')].map(el=>({k:el.querySelector('input:nth-child(1)').value.trim(), v:el.querySelector('input:nth-child(2)').value.trim()}));
-    if(notes.filter(n=>n.k&&n.v).length<2) return alert('至少對 2–3 條補充證據說明');
-    state.lv3.notes = notes;
-  }
-  if(id==='lv4'){
-    state.lv4.owner=document.getElementById('owner').value.trim();
-    state.lv4.review=document.getElementById('review').value;
-    state.lv4.repo=document.getElementById('repo').value.trim();
-    if(!state.lv4.owner || !state.lv4.review || state.lv4.assets.length<5) return alert('請填 Owner/ReviewDate 並勾至少 5 項資產');
-  }
-  if(id==='lv5'){
-    state.lv5.src=document.getElementById('lessonsSrc').value.trim();
-    state.lv5.out=document.getElementById('lessonsOut').value.trim();
-    if(!state.lv5.out) return alert('請完成 SOP/Checklist 文本');
-  }
-  if(id==='lv6'){
-    const files=[...document.querySelectorAll('#fileList [data-file]')].map(inp=>({name:inp.value.trim(), tags: (document.querySelector(`[data-tags="${inp.dataset.file}"]`).value||'').trim()}));
-    if(files.some(f=>!f.name)) return alert('請為所有檔案重新命名');
-    state.lv6.files=files;
-  }
-  state.finished[id]=true; addScore(15); alert('完成！此關 +15 分');
-}
-
-// 綁定完成按鈕
-[...document.querySelectorAll('[data-finish]')].forEach(btn=> btn.addEventListener('click', ()=> finish(btn.dataset.finish)));
-
-// 匯出 Markdown
-function renderPreview(){
-  const md = genMarkdown();
-  document.getElementById('preview').innerHTML = `<pre class="small" style="white-space:pre-wrap">${escapeHtml(md)}</pre>`;
-}
-
-function genMarkdown(){
-  return `# Project Closure Quest 成果
-
-總分：${state.score}
-已完成關卡：${Object.keys(state.finished).join(', ')}
-
-## Lv1 決策樹
-情境：${state.lv1.scenario?state.lv1.scenario.title:''}
-答案：${JSON.stringify(state.lv1.answers)}
-
-### 6句話終止溝通稿
-${state.lv1.script}
-
-## Lv2 DOR-Close 分類
-${Object.entries(state.lv2.buckets).map(([k,v])=>`- ${k}: ${v.join('、')}`).join('
-')}
-
-## Lv3 DOD-Close 選項
-- 勾選：${state.lv3.chosen.join('、')}
-- 補述：
-${(state.lv3.notes||[]).map(n=>`  - ${n.k}: ${n.v}`).join('
-')}
-
-## Lv4 移交
-- Owner：${state.lv4.owner}
-- Review Date：${state.lv4.review}
-- Repo/Path：${state.lv4.repo}
-- 資產：${state.lv4.assets.join('、')}
-
-## Lv5 SOP/Checklist
-${state.lv5.out}
-
-## Lv6 命名/標籤
-${(state.lv6.files||[]).map(f=>`- ${f.name} | tags: ${f.tags}`).join('
-')}
-`;
-}
-
-function escapeHtml(s){ return s.replace(/[&<>]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); }
-
-function download(filename, text){
-  const a=document.createElement('a'); a.setAttribute('href','data:text/markdown;charset=utf-8,'+encodeURIComponent(text)); a.setAttribute('download', filename); a.click();
-}
-
-document.getElementById('exportMd').onclick=()=>{ download('closure-quest-output.md', genMarkdown()); show('summary'); };
-
-document.getElementById('reset').onclick=()=>{ if(confirm('確認重置？')) location.reload(); };
-
-// 初始載入：預設套用「尾牙活動」案例
-const navToggle = document.querySelector('.navToggle');
-if(navToggle){ navToggle.addEventListener('click', ()=>{ document.querySelector('nav').classList.toggle('open'); }); }
-
-drawScenarioById('year_end');
-
-// Lv1 快速產生器
-function buildClosureScript(){
-  const aud = document.getElementById('q_aud').value || '全體同仁';
-  const typeSel = document.getElementById('q_type').value || '正常結案';
-  const s = state.lv1.scenario;
-  const type = typeSel || (s ? s.title : '正常結案');
-  const data = (document.getElementById('q_data').value || '出席/滿意度/成本差異等KPI').trim();
-  const mit = (document.getElementById('q_mit').value || '名單遮罩公開、未領獎品郵寄、媒體授權補簽').trim();
-  const next = (document.getElementById('q_next').value || '本週五完成對帳、下週三上架相簿/影片、下週五提交結案報告').trim();
-  const contact = (document.getElementById('q_contact').value || '行政處專案管理室（PM 王小明，pm@example.com）').trim();
-  const lines = [
-    `1) 親愛的${aud}，本專案將採取「${type}」，交付物為「${s? s.deliverable: 'V1 交付物'}」。`,
-    `2) 決策依據：${data}。`,
-    `3) 風險與影響：已評估為可接受，並設定對策。`,
-    `4) 補救與支援：${mit}。`,
-    `5) 後續里程碑：${next}。`,
-    `6) 聯絡窗口：${contact}。`
-  ].join('
-');
-  document.getElementById('closureScript').value = lines;
-}
-const qb = document.getElementById('quickBuild');
-if(qb){ qb.addEventListener('click', (e)=>{ e.preventDefault(); buildClosureScript(); }); }
-</script>
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
 </body>
 </html>
