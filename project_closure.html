@@ -1,0 +1,480 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Project Closure Quest｜專案終止 × 組織記憶（6輪）</title>
+  <style>
+    :root { --bg:#0f172a; --card:#111827; --ink:#e5e7eb; --ink2:#cbd5e1; --accent:#22d3ee; --muted:#475569; --ok:#22c55e; --warn:#f59e0b; --bad:#ef4444; }
+    html,body{margin:0;height:100%;font-family: system-ui, -apple-system, "Segoe UI", Roboto, Noto Sans TC, Arial, sans-serif;background:var(--bg);color:var(--ink);} 
+    .app{display:flex;flex-direction:column;min-height:100%}
+    header{position:sticky;top:0;background:linear-gradient(180deg,#0b1222, #0f172a);border-bottom:1px solid #1f2937;z-index:5}
+    .bar{display:flex;align-items:center;gap:.75rem;padding:.75rem 1rem;flex-wrap:wrap}
+    .title{font-weight:700;letter-spacing:.3px}
+    .pill{padding:.35rem .6rem;border-radius:999px;background:#0b1222;border:1px solid #1f2937;color:var(--ink2);font-size:.85rem}
+    .score{margin-left:auto;display:flex;gap:.5rem;align-items:center}
+    .btn{background:#0b1222;border:1px solid #1f2937;color:var(--ink);padding:.5rem .8rem;border-radius:.6rem;cursor:pointer}
+    .btn:hover{border-color:#334155}
+    .primary{background:linear-gradient(180deg,#0ea5e9,#0891b2);border-color:#0ea5e9}
+    main{display:grid;grid-template-columns:280px 1fr;gap:1rem;padding:1rem}
+    nav{position:sticky;top:62px;align-self:start}
+    .card{background:var(--card);border:1px solid #1f2937;border-radius:14px;padding:1rem}
+    .nav a{display:flex;align-items:center;gap:.5rem;padding:.55rem .6rem;margin:.25rem 0;color:var(--ink2);text-decoration:none;border-radius:.5rem}
+    .nav a.active{background:#0b1222;color:var(--ink);border:1px solid #334155}
+    .tag{font-size:.75rem;color:var(--ink2);border:1px dashed #334155;border-radius:6px;padding:.15rem .4rem}
+    h2{margin:.2rem 0 1rem 0}
+    section{display:none}
+    section.active{display:block}
+    .cols{display:grid;grid-template-columns:repeat(3,1fr);gap:.75rem}
+    .col{min-height:240px;background:#0b1222;border:1px dashed #334155;border-radius:10px;padding:.5rem}
+    .hint{color:var(--ink2);font-size:.9rem}
+    .item{background:#0f1a33;border:1px solid #334155;border-radius:10px;padding:.5rem;margin:.4rem 0;cursor:grab}
+    .ok{color:var(--ok)} .warn{color:var(--warn)} .bad{color:var(--bad)}
+    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+    label{display:block;margin:.35rem 0 .2rem .1rem;color:var(--ink2);font-size:.9rem}
+    input[type="text"], textarea, select{width:100%;padding:.6rem;border-radius:.6rem;border:1px solid #334155;background:#0b1222;color:var(--ink)}
+    textarea{min-height:120px}
+    .list{display:grid;grid-template-columns:1fr;gap:.4rem}
+    .check{display:flex;align-items:flex-start;gap:.6rem;padding:.4rem;border:1px solid #334155;border-radius:.6rem;background:#0b1222}
+    .muted{color:var(--muted);font-size:.85rem}
+    .kbd{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;background:#0b1222;border:1px solid #334155;padding:.15rem .35rem;border-radius:6px;font-size:.85rem;color:var(--ink2)}
+    .row{display:flex;gap:.5rem;flex-wrap:wrap}
+    .flex{display:flex;gap:.5rem;align-items:center}
+    .right{margin-left:auto}
+    .table{width:100%;border-collapse:collapse}
+    .table th,.table td{border:1px solid #334155;padding:.5rem;text-align:left}
+    .small{font-size:.85rem}
+    footer{padding:1rem;color:var(--ink2)}
+  </style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="bar">
+      <div class="title">Project Closure Quest</div>
+      <span class="pill">專案終止 × 組織記憶（6輪）</span>
+      <span class="pill">單檔版 · 免安裝</span>
+      <div class="score"><span>分數：</span><strong id="score">0</strong>
+        <button class="btn" id="exportMd">匯出成果</button>
+        <button class="btn" id="reset">重置</button>
+      </div>
+    </div>
+  </header>
+  <main>
+    <nav>
+      <div class="card nav" id="nav"></div>
+      <div class="card small">
+        <div class="hint">操作提示</div>
+        <ul>
+          <li>依左側選單依序闖關；每關完成會加分。</li>
+          <li>可隨時點「匯出成果」下載 Markdown 報告。</li>
+          <li>本檔可直接放 Github Pages，檔名 <span class="kbd">index.html</span>。</li>
+        </ul>
+      </div>
+    </nav>
+    <div>
+      <!-- Lv1 情境與決策樹 -->
+      <section id="lv1" class="card active">
+        <h2>Lv1｜終止情境 × 決策樹</h2>
+        <p class="hint">抽一張情境卡，回答二分問題，產出 6 句話終止溝通稿。</p>
+        <div class="row">
+          <button class="btn" id="drawScenario">抽情境卡</button>
+          <span id="scenarioTag" class="tag"></span>
+        </div>
+        <div id="scenarioBox" class="card" style="margin-top: .8rem"></div>
+        <div id="decisionBox" class="list" style="margin-top:.6rem"></div>
+        <label>你的 6 句話終止溝通稿</label>
+        <textarea id="closureScript" placeholder="1) 決策事實…\n2) 終止理由（以數據）…\n3) 風險控管…\n4) 對受影響者安排…\n5) 後續里程碑…\n6) 聯絡窗口…"></textarea>
+        <div class="row">
+          <button class="btn primary" data-finish="lv1">完成此關</button>
+        </div>
+      </section>
+
+      <!-- Lv2 DOR-Close 拖放 -->
+      <section id="lv2" class="card">
+        <h2>Lv2｜DOR-Close（準備就緒）拖放檢核</h2>
+        <p class="hint">把要件拖進「必備/選配/不需要」。並自訂 3 條。</p>
+        <div class="cols">
+          <div>
+            <div class="hint">候選要件</div>
+            <div id="dorPool"></div>
+            <div class="row">
+              <input id="customDor" placeholder="新增自訂要件…" />
+              <button class="btn" id="addDor">新增</button>
+            </div>
+          </div>
+          <div class="col" data-bucket="必備"><div class="hint">必備</div></div>
+          <div class="col" data-bucket="選配"><div class="hint">選配</div></div>
+          <div class="col" data-bucket="不需要"><div class="hint">不需要</div></div>
+        </div>
+        <div class="row" style="margin-top:.6rem">
+          <button class="btn primary" data-finish="lv2">完成此關</button>
+        </div>
+      </section>
+
+      <!-- Lv3 DOD-Close 勾選 -->
+      <section id="lv3" class="card">
+        <h2>Lv3｜DOD-Close（完成定義）挑選</h2>
+        <p class="hint">從候選清單挑 10–12 條，並對 3 條加上「證據型補述」。</p>
+        <div class="grid2">
+          <div>
+            <div class="list" id="dodList"></div>
+          </div>
+          <div>
+            <label>補述（挑 3 條寫證據連結/檔案）</label>
+            <div class="list" id="dodNotes"></div>
+          </div>
+        </div>
+        <div class="row" style="margin-top:.6rem">
+          <button class="btn primary" data-finish="lv3">完成此關</button>
+        </div>
+      </section>
+
+      <!-- Lv4 Handover 移交模擬 -->
+      <section id="lv4" class="card">
+        <h2>Lv4｜移交接棒模擬</h2>
+        <p class="hint">補齊 Owner、Review Date 與必備資產欄位，完成點交。</p>
+        <div class="grid2">
+          <div>
+            <label>接手單位/Owner</label>
+            <input id="owner" placeholder="e.g., 維運組／王小明" />
+            <label>Review Date（下次複審日）</label>
+            <input id="review" type="date" />
+            <label>存放路徑/連結</label>
+            <input id="repo" placeholder="雲端資料夾或Repo連結" />
+          </div>
+          <div>
+            <div class="hint">必備資產（至少勾 5 項）</div>
+            <div class="list" id="assetList"></div>
+          </div>
+        </div>
+        <div class="row" style="margin-top:.6rem">
+          <button class="btn primary" data-finish="lv4">完成此關</button>
+        </div>
+      </section>
+
+      <!-- Lv5 Lessons -> Template -->
+      <section id="lv5" class="card">
+        <h2>Lv5｜把教訓變模板（Lessons → SOP/Checklist）</h2>
+        <p class="hint">將心得改寫為可操作步驟與檢核項。</p>
+        <div class="grid2">
+          <div>
+            <label>教訓學習（逐字稿/摘錄）</label>
+            <textarea id="lessonsSrc">1) 上線前未凍結名單導致返工。
+2) 抽獎腳本無備援，直播延遲。
+3) 供應商驗收未留影像，請款爭議。</textarea>
+          </div>
+          <div>
+            <label>SOP/Checklist（請用「名詞＋動作＋證據」句型）</label>
+            <textarea id="lessonsOut" placeholder="例：抽獎名單已完成版本凍結（檔名與時間戳），上傳連結附於決策紀錄。"></textarea>
+          </div>
+        </div>
+        <div class="row">
+          <button class="btn" id="autoRewrite">AI 句型小幫手</button>
+          <button class="btn primary right" data-finish="lv5">完成此關</button>
+        </div>
+      </section>
+
+      <!-- Lv6 Findability 命名與標籤 -->
+      <section id="lv6" class="card">
+        <h2>Lv6｜找得到測試（命名與標籤）</h2>
+        <p class="hint">為 5 份檔案重命名並加標籤，再做 60 秒搜尋測試（簡化版）。</p>
+        <div class="list" id="fileList"></div>
+        <div class="row" style="margin-top:.6rem">
+          <button class="btn primary" data-finish="lv6">完成此關</button>
+        </div>
+      </section>
+
+      <!-- 總結與匯出預覽 -->
+      <section id="summary" class="card">
+        <h2>總結與匯出</h2>
+        <div id="preview" class="small"></div>
+      </section>
+    </div>
+  </main>
+  <footer>
+    <div class="small">© 2025 Project Closure Quest — 單檔教學版。此檔不依賴外部套件，支援 GitHub Pages。作者：你和你的助教 😄</div>
+  </footer>
+</div>
+<script>
+// --- 簡易資料 ---
+const state = {
+  score: 0,
+  finished: {},
+  lv1: { scenario: null, answers: {}, script: "" },
+  lv2: { buckets: {"必備":[],"選配":[],"不需要":[]}},
+  lv3: { chosen: [], notes: {} },
+  lv4: { owner:"", review:"", repo:"", assets:[] },
+  lv5: { src:"", out:"" },
+  lv6: { files: [] }
+};
+
+const scenarios = [
+  { id:"normal", title:"功能達成，收尾結案", facts:["EV≈PV","關鍵客戶滿意","技術債低"], questions:[
+    {k:"mvp", q:"是否已達最小可行價值（MVP）？"},
+    {k:"risk", q:"重大風險是否在可接受範圍？"},
+    {k:"alt", q:"是否存在更高ROI的替代方案？"}
+  ]},
+  { id:"early", title:"策略轉向，提前終止", facts:["新產品線勝出","市場窗口改變","剩餘預算有限"], questions:[
+    {k:"data", q:"是否有數據支持終止優於續推？"},
+    {k:"stake", q:"主要干係人是否理解影響並同意？"},
+    {k:"plan", q:"是否有完善的關閉與移轉計畫？"}
+  ]},
+  { id:"cancel", title:"合規風險，取消/中止", facts:["GDPR 疑慮","品牌風險","法遵審查未過"], questions:[
+    {k:"comp", q:"是否存在不可接受的法遵/資安缺陷？"},
+    {k:"miti", q:"是否已嘗試合理緩解仍不可行？"},
+    {k:"com", q:"是否擬定對外溝通與補救方案？"}
+  ]},
+  { id:"ba u", title:"轉移至維運（BAU）", facts:["功能穩定","維護成本低","需求長期"], questions:[
+    {k:"sla", q:"是否定義營運SLA與維護窗口？"},
+    {k:"handover", q:"資產/帳號/環境是否可移交？"},
+    {k:"metrics", q:"是否設置持續監控與KPI？"}
+  ]},
+];
+
+const dorPool = [
+  "合約/採購未結義務盤點完成",
+  "財務預估 vs 實際收支盤點完成",
+  "移交對象與 SLA 草案就緒",
+  "資安/法遵/品牌核對清單備妥",
+  "干係人對終止理由與範圍初步同意",
+  "結案文件骨架建立（Closure/Handover/Lessons）",
+  "環境與帳號清冊初稿",
+  "風險殘留清單初稿（Owner/期限）"
+];
+
+const dodPool = [
+  {t:"正式驗收與簽認完成（附連結）", good:true},
+  {t:"供應商對帳/請款/保固文件齊全", good:true},
+  {t:"移交完成：Owner/ReviewDate/存放路徑寫明", good:true},
+  {t:"教訓學習會議完成並入庫", good:true},
+  {t:"最終KPI與差異分析定稿", good:true},
+  {t:"風險殘留已指定Owner與追蹤日程", good:true},
+  {t:"結案公告發布（對內/對外）", good:true},
+  {t:"大家都覺得很圓滿", good:false},
+  {t:"好像差不多可以結束了", good:false},
+  {t:"照片與影片整理歸檔（權限設定完成）", good:true},
+  {t:"擬定未來也要更努力", good:false},
+  {t:"資料保存/銷毀策略執行證明", good:true},
+  {t:"決策清單與依據入庫（Decision Log）", good:true},
+  {t:"隨緣即可", good:false}
+];
+
+const assets = [
+  "源碼/原始檔/設計檔",
+  "可執行包/部署腳本/回滾方案",
+  "帳號/權限清冊",
+  "Runbook/SOP",
+  "SLA/維護窗口/值班表",
+  "合約/保固/授權文件",
+  "使用者文件/FAQ",
+  "稽核Log/監控儀表板連結"
+];
+
+const messyFiles = [
+  "final_final_report_v3(真的最後).pptx",
+  "IMG_20241211_134233.JPG",
+  "doc1.docx",
+  "報告new最新最終版.pptx",
+  "meeting_notes(小美).txt"
+];
+
+// --- 導航 ---
+const sections = [
+  {id:"lv1", name:"1 決策樹"},
+  {id:"lv2", name:"2 DOR 拖放"},
+  {id:"lv3", name:"3 DOD 勾選"},
+  {id:"lv4", name:"4 移交模擬"},
+  {id:"lv5", name:"5 教訓→模板"},
+  {id:"lv6", name:"6 找得到"},
+  {id:"summary", name:"總結/匯出"}
+];
+const nav = document.getElementById('nav');
+sections.forEach((s,i)=>{
+  const a=document.createElement('a');
+  a.href="#"; a.textContent=s.name; a.dataset.to=s.id; if(i===0) a.classList.add('active');
+  a.onclick=(e)=>{e.preventDefault(); show(s.id)}; nav.appendChild(a);
+});
+function show(id){
+  document.querySelectorAll('section').forEach(sec=>sec.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.nav a').forEach(a=>a.classList.toggle('active', a.dataset.to===id));
+  if(id==='summary') renderPreview();
+}
+
+// --- 分數 ---
+function addScore(n){ state.score += n; document.getElementById('score').textContent = state.score; }
+
+// --- Lv1 ---
+const drawBtn = document.getElementById('drawScenario');
+const scenarioBox = document.getElementById('scenarioBox');
+const decisionBox = document.getElementById('decisionBox');
+const scenarioTag = document.getElementById('scenarioTag');
+
+drawBtn.onclick = ()=>{
+  const s = scenarios[Math.floor(Math.random()*scenarios.length)];
+  state.lv1.scenario = s; state.lv1.answers={};
+  scenarioTag.textContent = s.title;
+  scenarioBox.innerHTML = `<div class="small">事實：${s.facts.map(f=>`<span class="tag">${f}</span>`).join(' ')}</div>`;
+  decisionBox.innerHTML = '';
+  s.questions.forEach(q=>{
+    const row=document.createElement('div'); row.className='check';
+    row.innerHTML = `<div class="small">${q.q}</div>
+      <div class="right flex">
+        <label class="flex"><input type="radio" name="${q.k}" value="yes"> <span class="small">是</span></label>
+        <label class="flex"><input type="radio" name="${q.k}" value="no"> <span class="small">否</span></label>
+      </div>`;
+    decisionBox.appendChild(row);
+  });
+};
+
+// --- Lv2 DOR Drag ---
+const dorPoolBox = document.getElementById('dorPool');
+function makeItem(text){ const d=document.createElement('div'); d.className='item'; d.draggable=true; d.textContent=text; d.addEventListener('dragstart',ev=>{ev.dataTransfer.setData('text/plain', text);}); return d; }
+function renderDorPool(){ dorPoolBox.innerHTML=''; dorPool.forEach(t=> dorPoolBox.appendChild(makeItem(t))); }
+renderDorPool();
+
+document.querySelectorAll('.col').forEach(col=>{
+  col.addEventListener('dragover', ev=> ev.preventDefault());
+  col.addEventListener('drop', ev=>{
+    ev.preventDefault(); const t = ev.dataTransfer.getData('text/plain');
+    const bucket = col.dataset.bucket; if(!state.lv2.buckets[bucket].includes(t)) state.lv2.buckets[bucket].push(t);
+    const el = makeItem(t); col.appendChild(el);
+  });
+});
+
+document.getElementById('addDor').onclick = ()=>{
+  const v = document.getElementById('customDor').value.trim();
+  if(!v) return; dorPool.push(v); renderDorPool(); document.getElementById('customDor').value='';
+};
+
+// --- Lv3 DOD checklist ---
+const dodList = document.getElementById('dodList');
+const dodNotes = document.getElementById('dodNotes');
+function renderDod(){
+  dodList.innerHTML='';
+  dodPool.forEach((d,i)=>{
+    const wrap=document.createElement('div'); wrap.className='check';
+    wrap.innerHTML = `<input type="checkbox" data-i="${i}"> <div>${d.t} ${d.good?'<span class="ok">(可檢核)</span>':'<span class="bad">(口號/不可檢核)</span>'}</div>`;
+    dodList.appendChild(wrap);
+  });
+  dodNotes.innerHTML='';
+  for(let k=0;k<3;k++){ const r=document.createElement('div'); r.className='check'; r.innerHTML=`<input placeholder="條目名稱"> <input placeholder="證據/連結/檔案">`; dodNotes.appendChild(r);}  
+}
+renderDod();
+
+dodList.addEventListener('change', (e)=>{
+  if(e.target.matches('input[type="checkbox"]')){
+    const i=+e.target.dataset.i; const t=dodPool[i].t;
+    if(e.target.checked){ if(!state.lv3.chosen.includes(t)) state.lv3.chosen.push(t); }
+    else{ state.lv3.chosen = state.lv3.chosen.filter(x=>x!==t); }
+  }
+});
+
+// --- Lv4 assets ---
+const assetList = document.getElementById('assetList');
+assets.forEach((a,idx)=>{
+  const row=document.createElement('label'); row.className='check';
+  row.innerHTML = `<input type="checkbox" data-asset="${a}"> <div>${a}</div>`;
+  assetList.appendChild(row);
+});
+assetList.addEventListener('change', (e)=>{
+  if(e.target.matches('input[type="checkbox"]')){
+    const a=e.target.dataset.asset; if(e.target.checked){ if(!state.lv4.assets.includes(a)) state.lv4.assets.push(a);} else { state.lv4.assets = state.lv4.assets.filter(x=>x!==a);} }
+});
+
+// --- Lv5 rewrite helper (簡易規則，把句子轉句型) ---
+function rewriteLines(txt){
+  return txt.split(/\n+/).map(s=>s.trim()).filter(Boolean).map((s,i)=>{
+    let noun=s.replace(/[。.!?]$/,'');
+    return `${i+1}. ${noun} 已建立對應控制（證據：連結/截圖/檔名）`;
+  }).join('\n');
+}
+
+document.getElementById('autoRewrite').onclick=()=>{
+  const src=document.getElementById('lessonsSrc').value; document.getElementById('lessonsOut').value = rewriteLines(src);
+};
+
+// --- Lv6 files rename ---
+const fileList = document.getElementById('fileList');
+function renderFiles(){
+  fileList.innerHTML='';
+  messyFiles.forEach((f,i)=>{
+    const row=document.createElement('div'); row.className='grid2';
+    row.innerHTML = `<div class="check"><div>原檔名：<span class="tag">${f}</span></div></div>
+      <div class="check">
+        <div class="small">新檔名（格式：主題-制品-版本-日期-Owner）</div>
+        <input data-file="${i}" placeholder="例如：尾牙-結案報告-v1.0-2025-12-01-JF">
+        <div class="small">標籤（≤5，用逗號分隔）</div>
+        <input data-tags="${i}" placeholder="#活動管理,#教訓學習,#模板">
+      </div>`;
+    fileList.appendChild(row);
+  });
+}
+renderFiles();
+
+// --- 完成關卡 ---
+function finish(id){
+  if(state.finished[id]){ alert('已完成，可重做但不再加分'); return; }
+  // 輕量驗證
+  if(id==='lv1'){
+    document.querySelectorAll('#decisionBox input[type=radio]:checked').forEach(r=>{ state.lv1.answers[r.name]=r.value; });
+    state.lv1.script = document.getElementById('closureScript').value.trim();
+    if(!state.lv1.script) return alert('請寫 6 句話溝通稿');
+  }
+  if(id==='lv2'){
+    const need = state.lv2.buckets['必備'] || []; if(need.length<4) return alert('至少放 4 條在「必備」');
+  }
+  if(id==='lv3'){
+    const c = state.lv3.chosen.length; if(c<10 || c>12) return alert('請勾選 10–12 條 DOD');
+    const notes=[...document.querySelectorAll('#dodNotes .check')].map(el=>({k:el.querySelector('input:nth-child(1)').value.trim(), v:el.querySelector('input:nth-child(2)').value.trim()}));
+    if(notes.filter(n=>n.k&&n.v).length<2) return alert('至少對 2–3 條補充證據說明');
+    state.lv3.notes = notes;
+  }
+  if(id==='lv4'){
+    state.lv4.owner=document.getElementById('owner').value.trim();
+    state.lv4.review=document.getElementById('review').value;
+    state.lv4.repo=document.getElementById('repo').value.trim();
+    if(!state.lv4.owner || !state.lv4.review || state.lv4.assets.length<5) return alert('請填 Owner/ReviewDate 並勾至少 5 項資產');
+  }
+  if(id==='lv5'){
+    state.lv5.src=document.getElementById('lessonsSrc').value.trim();
+    state.lv5.out=document.getElementById('lessonsOut').value.trim();
+    if(!state.lv5.out) return alert('請完成 SOP/Checklist 文本');
+  }
+  if(id==='lv6'){
+    const files=[...document.querySelectorAll('#fileList [data-file]')].map(inp=>({name:inp.value.trim(), tags: (document.querySelector(`[data-tags="${inp.dataset.file}"]`).value||'').trim()}));
+    if(files.some(f=>!f.name)) return alert('請為所有檔案重新命名');
+    state.lv6.files=files;
+  }
+  state.finished[id]=true; addScore(15); alert('完成！此關 +15 分');
+}
+
+// 綁定完成按鈕
+[...document.querySelectorAll('[data-finish]')].forEach(btn=> btn.addEventListener('click', ()=> finish(btn.dataset.finish)));
+
+// 匯出 Markdown
+function renderPreview(){
+  const md = genMarkdown();
+  document.getElementById('preview').innerHTML = `<pre class="small" style="white-space:pre-wrap">${escapeHtml(md)}</pre>`;
+}
+
+function genMarkdown(){
+  return `# Project Closure Quest 成果\n\n總分：${state.score}\n已完成關卡：${Object.keys(state.finished).join(', ')}\n\n## Lv1 決策樹\n情境：${state.lv1.scenario?state.lv1.scenario.title:''}\n答案：${JSON.stringify(state.lv1.answers)}\n\n### 6句話終止溝通稿\n${state.lv1.script}\n\n## Lv2 DOR-Close 分類\n${Object.entries(state.lv2.buckets).map(([k,v])=>`- ${k}: ${v.join('、')}`).join('\n')}\n\n## Lv3 DOD-Close 選項\n- 勾選：${state.lv3.chosen.join('、')}\n- 補述：\n${(state.lv3.notes||[]).map(n=>`  - ${n.k}: ${n.v}`).join('\n')}\n\n## Lv4 移交\n- Owner：${state.lv4.owner}\n- Review Date：${state.lv4.review}\n- Repo/Path：${state.lv4.repo}\n- 資產：${state.lv4.assets.join('、')}\n\n## Lv5 SOP/Checklist\n${state.lv5.out}\n\n## Lv6 命名/標籤\n${(state.lv6.files||[]).map(f=>`- ${f.name} | tags: ${f.tags}`).join('\n')}\n`;
+}
+
+function escapeHtml(s){ return s.replace(/[&<>]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); }
+
+function download(filename, text){
+  const a=document.createElement('a'); a.setAttribute('href','data:text/markdown;charset=utf-8,'+encodeURIComponent(text)); a.setAttribute('download', filename); a.click();
+}
+
+document.getElementById('exportMd').onclick=()=>{ download('closure-quest-output.md', genMarkdown()); show('summary'); };
+
+document.getElementById('reset').onclick=()=>{ if(confirm('確認重置？')) location.reload(); };
+
+// 初始載入：自動抽一張情境
+drawBtn.click();
+</script>
+</body>
+</html>
