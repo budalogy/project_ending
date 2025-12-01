@@ -49,6 +49,15 @@
     /* 手機優化：左側縮到頂部、內容全寬、選項更易讀 */
     @media (max-width: 900px){
       main{grid-template-columns:1fr}
+      nav{position:static; display:none}
+      nav.open{display:block}
+      .navToggle{display:block}
+      .grid2{grid-template-columns:1fr}
+      .cols{grid-template-columns:1fr}
+      .check{flex-direction:column;align-items:flex-start}
+      textarea{min-height:160px}
+      .bar{gap:.5rem}
+    }
       nav{position:static}
       .grid2{grid-template-columns:1fr}
       .cols{grid-template-columns:1fr}
@@ -62,6 +71,7 @@
 <div class="app">
   <header>
     <div class="bar">
+      <button class="btn navToggle" aria-label="切換選單" style="display:none">≡</button>
       <div class="title">Project Closure Quest</div>
       <span class="pill">專案終止 × 組織記憶（6輪）</span>
       <span class="pill">單檔版 · 免安裝</span>
@@ -94,65 +104,48 @@
         </div>
         <div id="scenarioBox" class="card" style="margin-top: .8rem"></div>
         <div id="decisionBox" class="list" style="margin-top:.6rem"></div>
-        <label>你的 6 句話終止溝通稿<\/label>
-        <textarea id=\"closureScript\" placeholder=\"1) 決策事實…\n2) 終止理由（以數據）…\n3) 風險控管…\n4) 對受影響者安排…\n5) 後續里程碑…\n6) 聯絡窗口…\"></textarea>
-        <div class=\"card small\" style=\"margin:.6rem 0\">
-          <div class=\"hint\">快速產生器（點選下列選項，按下方按鈕即可自動產生 6 句話）<\/div>
-          <div class=\"grid2\">
+        <label>你的 6 句話終止溝通稿</label>
+        <textarea id="closureScript" placeholder="1) 決策事實…
+2) 終止理由（以數據）…
+3) 風險控管…
+4) 對受影響者安排…
+5) 後續里程碑…
+6) 聯絡窗口…"></textarea>
+        <div class="card small" style="margin:.6rem 0">
+          <div class="hint">快速產生器（點選下列選項，按下方按鈕即可自動產生 6 句話）</div>
+          <div class="grid2">
             <div>
               <label>受眾</label>
-              <select id=\"q_aud\">
-                <option value=\"全體同仁\">全體同仁<\/option>
-                <option value=\"專案相關干係人\">專案相關干係人<\/option>
-                <option value=\"客戶與合作夥伴\">客戶與合作夥伴<\/option>
+              <select id="q_aud">
+                <option value="全體同仁">全體同仁</option>
+                <option value="專案相關干係人">專案相關干係人</option>
+                <option value="客戶與合作夥伴">客戶與合作夥伴</option>
               </select>
-              <label>終止類型<\/label>
-              <select id=\"q_type\">
-                <option value=\"正常結案\">正常結案<\/option>
-                <option value=\"提前終止\">提前終止<\/option>
-                <option value=\"取消\/中止\">取消\/中止<\/option>
-                <option value=\"移轉至維運（BAU）\">移轉至維運（BAU）<\/option>
-              <\/select>
-              <label>關鍵數據（成效/成本/風險）<\/label>
-              <input id=\"q_data\" placeholder=\"例：達成KPI 92%，預估持續成本↑30%\" />
-            <\/div>
+              <label>終止類型</label>
+              <select id="q_type">
+                <option value="正常結案">正常結案</option>
+                <option value="提前終止">提前終止</option>
+                <option value="取消/中止">取消/中止</option>
+                <option value="移轉至維運（BAU）">移轉至維運（BAU）</option>
+              </select>
+              <label>關鍵數據（成效/成本/風險）</label>
+              <input id="q_data" placeholder="例：達成 KPI 92%，持續成本↑30%" />
+            </div>
             <div>
-              <label>風險控管與補救<\/label>
-              <input id=\"q_mit\" placeholder=\"例：資料備份完成，供應商保固維持至 2026-06-30\" />
-              <label>後續里程碑（日期）<\/label>
-              <input id=\"q_next\" placeholder=\"例：12\/20 完成移交；12\/27 提交結案報告\" />
-              <label>聯絡窗口<\/label>
-              <input id=\"q_contact\" placeholder=\"例：PM 王小明（pm@example.com）\" />
-            <\/div>
-          <\/div>
-          <div class=\"row\" style=\"margin-top:.5rem\">
-            <button class=\"btn\" id=\"quickBuild\">用點選快速生成<\/button>
-          <\/div>
-        <\/div>
-        <div class=\"row\"> 
-          <button class=\"btn primary\" data-finish=\"lv1\">完成此關<\/button>
-        <\/div>
-      <\/section>
-
-      <!-- Lv2 DOR-Close 拖放 -->
-      <section id="lv2" class="card">
-        <h2>Lv2｜DOR-Close（準備就緒）拖放檢核</h2>
-        <p class="hint">把要件拖進「必備/選配/不需要」。並自訂 3 條。</p>
-        <div class="cols">
-          <div>
-            <div class="hint">候選要件</div>
-            <div id="dorPool"></div>
-            <div class="row">
-              <input id="customDor" placeholder="新增自訂要件…" />
-              <button class="btn" id="addDor">新增</button>
+              <label>風險控管與補救</label>
+              <input id="q_mit" placeholder="例：資料備份完成，供應商保固至 2026-06-30" />
+              <label>後續里程碑（日期）</label>
+              <input id="q_next" placeholder="例：12/20 完成移交；12/27 提交結案報告" />
+              <label>聯絡窗口</label>
+              <input id="q_contact" placeholder="例：PM 王小明（pm@example.com）" />
             </div>
           </div>
-          <div class="col" data-bucket="必備"><div class="hint">必備</div></div>
-          <div class="col" data-bucket="選配"><div class="hint">選配</div></div>
-          <div class="col" data-bucket="不需要"><div class="hint">不需要</div></div>
+          <div class="row" style="margin-top:.5rem">
+            <button class="btn" id="quickBuild">用點選快速生成</button>
+          </div>
         </div>
-        <div class="row" style="margin-top:.6rem">
-          <button class="btn primary" data-finish="lv2">完成此關</button>
+        <div class="row">
+          <button class="btn primary" data-finish="lv1">完成此關</button>
         </div>
       </section>
 
@@ -256,18 +249,18 @@ const state = {
 const scenarios = [
   { id:"normal", title:"功能達成，收尾結案",
     deliverable:"V1 功能集（報名頁 + 抽獎模組）",
-    objective:"已滿足最低可行價值（MVP），準備進行驗收與移交",
-    done_example:"關鍵功能通過 UAT、缺陷皆可接受",
+    objective:"已滿足 MVP，準備驗收與移交",
+    done_example:"UAT 通過、缺陷皆可接受",
     facts:["EV≈PV","關鍵客戶滿意","技術債低"],
     questions:[
       {k:"mvp", q:"是否已達最小可行價值（MVP）？"},
       {k:"risk", q:"重大風險是否在可接受範圍？"},
-      {k:"alt", q:"是否存在更高ROI的替代方案？"}
+      {k:"alt", q:"是否存在更高 ROI 的替代方案？"}
     ]},
   { id:"early", title:"策略轉向，提前終止",
-    deliverable:"原專案剩餘模組（抽獎直播整合）",
+    deliverable:"剩餘模組（抽獎直播整合）",
     objective:"終止剩餘開發以釋出資源至新產品線",
-    done_example:"已交付的部分繼續維護，未開始的項目取消",
+    done_example:"已交付部分維運、未開始項目取消",
     facts:["新產品線勝出","市場窗口改變","剩餘預算有限"],
     questions:[
       {k:"data", q:"是否有數據支持終止優於續推？"},
@@ -290,9 +283,9 @@ const scenarios = [
     done_example:"SLA/值班與回報機制啟用",
     facts:["功能穩定","維護成本低","需求長期"],
     questions:[
-      {k:"sla", q:"是否定義營運SLA與維護窗口？"},
+      {k:"sla", q:"是否定義營運 SLA 與維護窗口？"},
       {k:"handover", q:"資產/帳號/環境是否可移交？"},
-      {k:"metrics", q:"是否設置持續監控與KPI？"}
+      {k:"metrics", q:"是否設置持續監控與 KPI？"}
     ]},
 ];
 
@@ -379,6 +372,30 @@ const scenarioTag = document.getElementById('scenarioTag');
 drawBtn.onclick = ()=>{
   const s = scenarios[Math.floor(Math.random()*scenarios.length)];
   state.lv1.scenario = s; state.lv1.answers={};
+  scenarioTag.textContent = s.title;
+  scenarioBox.innerHTML = `
+    <div class="small">
+      <div><strong>要結束/移交的交付物：</strong>${s.deliverable}</div>
+      <div><strong>目前狀態：</strong>${s.objective}；<em>完成例：</em>${s.done_example}</div>
+      <div><strong>事實：</strong>${s.facts.map(f=>`<span class='tag'>${f}</span>`).join(' ')}</div>
+    </div>`;
+  decisionBox.innerHTML = '';
+  s.questions.forEach(q=>{
+    const row=document.createElement('div'); row.className='check';
+    row.innerHTML = `<div class="small">${q.q}</div>
+      <div class="right flex">
+        <label class="flex"><input type="radio" name="${q.k}" value="yes"> <span class="small">是</span></label>
+        <label class="flex"><input type="radio" name="${q.k}" value="no"> <span class="small">否</span></label>
+      </div>`;
+    decisionBox.appendChild(row);
+  });
+  document.getElementById('closureScript').placeholder = `1) 決策事實（我們將${s.title}）。
+2) 終止/結案理由（${s.facts[0]}…以數據說明）。
+3) 風險控管（目前風險與對策）。
+4) 受影響對象的補救/資源安排。
+5) 後續里程碑（範例：下週三完成移交）。
+6) 聯絡窗口（單位/姓名/信箱）。`;
+};  state.lv1.scenario = s; state.lv1.answers={};
   scenarioTag.textContent = s.title;
   // 情境摘要（清楚說明：要結束的是什麼？完成到哪？）
   scenarioBox.innerHTML = `
@@ -567,6 +584,34 @@ document.getElementById('reset').onclick=()=>{ if(confirm('確認重置？')) lo
 
 // 初始載入：自動抽一張情境
 drawBtn.click();
+
+// 手機：切換左側選單
+const navToggle = document.querySelector('.navToggle');
+if(navToggle){ navToggle.addEventListener('click', ()=>{ document.querySelector('nav').classList.toggle('open'); }); }
+
+// Lv1 快速產生器
+function buildClosureScript(){
+  const aud = document.getElementById('q_aud').value || '全體同仁';
+  const typeSel = document.getElementById('q_type').value || '正常結案';
+  const s = state.lv1.scenario;
+  const type = typeSel || (s ? s.title : '正常結案');
+  const data = (document.getElementById('q_data').value || '依據專案 KPI 與成本/風險評估').trim();
+  const mit = (document.getElementById('q_mit').value || '已完成資料備援、合約保固與人員安置').trim();
+  const next = (document.getElementById('q_next').value || '下週三完成移交、下週五提交結案報告').trim();
+  const contact = (document.getElementById('q_contact').value || 'PM 王小明（pm@example.com）').trim();
+  const lines = [
+    `1) 親愛的${aud}，本專案將採取「${type}」，交付物為「${s? s.deliverable: 'V1 交付物'}」。`,
+    `2) 決策依據：${data}。`,
+    `3) 風險與影響：已評估為可接受，並設定對策。`,
+    `4) 補救與支援：${mit}。`,
+    `5) 後續里程碑：${next}。`,
+    `6) 聯絡窗口：${contact}。`
+  ].join('
+');
+  document.getElementById('closureScript').value = lines;
+}
+const qb = document.getElementById('quickBuild');
+if(qb){ qb.addEventListener('click', (e)=>{ e.preventDefault(); buildClosureScript(); }); }
 
 // Lv1 快速產生器
 function buildClosureScript(){
