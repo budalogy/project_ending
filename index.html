@@ -330,7 +330,9 @@
                         isCorrect = true;
                         message = "歸類正確！";
                     } else {
-                        message = "歸類不當。";
+                        // NEW LOGIC: Tell the correct target
+                        const correctTargetName = TARGETS.find(t => t.id === artifact.correctTarget)?.name;
+                        message = `歸類錯誤 (應為：${correctTargetName})。`;
                     }
 
                     // Tag Check logic
@@ -348,10 +350,12 @@
                         }
                     } else {
                          if (decision.target !== 'trash') {
-                             message = "保留了雜訊。";
+                             // This is already covered by the target check above
+                             // but we can add specific noise feedback if needed
+                             message += " 保留了雜訊。"; 
                              itemScore -= 5;
                          } else {
-                             message = "成功清除。";
+                             message = "成功清除。"; // Override "Correct" for trash if needed, or keep as is
                              itemScore += 5; 
                          }
                     }
