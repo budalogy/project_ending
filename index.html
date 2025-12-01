@@ -83,12 +83,45 @@
         </div>
         <div id="scenarioBox" class="card" style="margin-top: .8rem"></div>
         <div id="decisionBox" class="list" style="margin-top:.6rem"></div>
-        <label>你的 6 句話終止溝通稿</label>
-        <textarea id="closureScript" placeholder="1) 決策事實…\n2) 終止理由（以數據）…\n3) 風險控管…\n4) 對受影響者安排…\n5) 後續里程碑…\n6) 聯絡窗口…"></textarea>
-        <div class="row">
-          <button class="btn primary" data-finish="lv1">完成此關</button>
-        </div>
-      </section>
+        <label>你的 6 句話終止溝通稿<\/label>
+        <textarea id=\"closureScript\" placeholder=\"1) 決策事實…\n2) 終止理由（以數據）…\n3) 風險控管…\n4) 對受影響者安排…\n5) 後續里程碑…\n6) 聯絡窗口…\"></textarea>
+        <div class=\"card small\" style=\"margin:.6rem 0\">
+          <div class=\"hint\">快速產生器（點選下列選項，按下方按鈕即可自動產生 6 句話）<\/div>
+          <div class=\"grid2\">
+            <div>
+              <label>受眾</label>
+              <select id=\"q_aud\">
+                <option value=\"全體同仁\">全體同仁<\/option>
+                <option value=\"專案相關干係人\">專案相關干係人<\/option>
+                <option value=\"客戶與合作夥伴\">客戶與合作夥伴<\/option>
+              </select>
+              <label>終止類型<\/label>
+              <select id=\"q_type\">
+                <option value=\"正常結案\">正常結案<\/option>
+                <option value=\"提前終止\">提前終止<\/option>
+                <option value=\"取消\/中止\">取消\/中止<\/option>
+                <option value=\"移轉至維運（BAU）\">移轉至維運（BAU）<\/option>
+              <\/select>
+              <label>關鍵數據（成效/成本/風險）<\/label>
+              <input id=\"q_data\" placeholder=\"例：達成KPI 92%，預估持續成本↑30%\" />
+            <\/div>
+            <div>
+              <label>風險控管與補救<\/label>
+              <input id=\"q_mit\" placeholder=\"例：資料備份完成，供應商保固維持至 2026-06-30\" />
+              <label>後續里程碑（日期）<\/label>
+              <input id=\"q_next\" placeholder=\"例：12\/20 完成移交；12\/27 提交結案報告\" />
+              <label>聯絡窗口<\/label>
+              <input id=\"q_contact\" placeholder=\"例：PM 王小明（pm@example.com）\" />
+            <\/div>
+          <\/div>
+          <div class=\"row\" style=\"margin-top:.5rem\">
+            <button class=\"btn\" id=\"quickBuild\">用點選快速生成<\/button>
+          <\/div>
+        <\/div>
+        <div class=\"row\"> 
+          <button class=\"btn primary\" data-finish=\"lv1\">完成此關<\/button>
+        <\/div>
+      <\/section>
 
       <!-- Lv2 DOR-Close 拖放 -->
       <section id="lv2" class="card">
@@ -475,6 +508,30 @@ document.getElementById('reset').onclick=()=>{ if(confirm('確認重置？')) lo
 
 // 初始載入：自動抽一張情境
 drawBtn.click();
+
+// Lv1 快速產生器
+function buildClosureScript(){
+  const aud = document.getElementById('q_aud').value || '全體同仁';
+  const type = document.getElementById('q_type').value || '正常結案';
+  const data = (document.getElementById('q_data').value || '依據專案KPI與成本/風險評估').trim();
+  const mit = (document.getElementById('q_mit').value || '已完成資料備援與合約保固安排').trim();
+  const next = (document.getElementById('q_next').value || '後續里程碑將依時間表執行').trim();
+  const contact = (document.getElementById('q_contact').value || '專案窗口將持續提供協助').trim();
+  const s = state.lv1.scenario ? state.lv1.scenario.title : type;
+  const lines = [
+    `1) 親愛的${aud}，本專案將採取「${type}」：情境—${s}。`,
+    `2) 決策依據：${data}。`,
+    `3) 風險與影響：經評估後於可接受範圍，關鍵風險皆有對策。`,
+    `4) 補救與支援：${mit}。`,
+    `5) 後續里程碑：${next}。`,
+    `6) 聯絡窗口：${contact}。`
+  ].join('
+');
+  document.getElementById('closureScript').value = lines;
+}
+
+const qb = document.getElementById('quickBuild');
+if(qb){ qb.addEventListener('click', (e)=>{ e.preventDefault(); buildClosureScript(); }); }
 </script>
 </body>
 </html>
